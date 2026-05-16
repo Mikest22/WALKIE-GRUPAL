@@ -5,27 +5,31 @@ const { ExpressPeerServer } = require("peer");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
 
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static("public"));
 
 const peerServer = ExpressPeerServer(server, {
-  path: "/peerjs"
+  path: "/"
 });
 
 app.use("/peerjs", peerServer);
 
-let rooms = {};
+const rooms = {};
 
 io.on("connection", socket => {
-  socket.on("join-room", ({ room, peerId, name }) => {
+  socket.on("join-room", data => {
+    const { room, peerId, name } = data;
+
     socket.join(room);
 
     if (!rooms[room]) rooms[room] = [];
 
-    socket.emit("existing-users", rooms[room]);
+    socket.emit("users-in-room", rooms[room]);
 
     rooms[room].push({
       socketId: socket.id,
@@ -33,18 +37,21 @@ io.on("connection", socket => {
       name
     });
 
-    socket.to(room).emit("user-connected", {
+    socket.to(room).emit("user-joined", {
       peerId,
       name
     });
 
     socket.on("disconnect", () => {
-      rooms[room] = rooms[room].filter(user => user.socketId !== socket.id);
-      socket.to(room).emit("user-disconnected", peerId);
+      if (!rooms[room]) return;
+
+      rooms[room] = rooms[room].filter(u => u.socketId !== socket.id);
+
+      socket.to(room).emit("user-left", peerId);
     });
   });
 });
 
 server.listen(PORT, () => {
-  console.log("Servidor iniciado en puerto " + PORT);
+  console.log("Servidor listo en puerto " + PORT);
 });
