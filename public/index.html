@@ -6,431 +6,995 @@
 <title>Walkie Pro</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;width:100%;min-height:100%;background:#02070c;color:white;font-family:Arial,sans-serif;}
-body{display:flex;justify-content:center;align-items:center;padding:12px;background:radial-gradient(circle at top left,#2d1230,transparent 35%),radial-gradient(circle at bottom right,#004d45,transparent 40%),#02070c;}
-.card{width:100%;max-width:430px;min-height:95vh;border-radius:32px;padding:18px;text-align:center;background:linear-gradient(145deg,rgba(12,18,27,.95),rgba(5,35,35,.9));border:1px solid rgba(135,255,235,.35);box-shadow:0 0 25px rgba(0,255,220,.18),inset 0 0 30px rgba(255,255,255,.04);}
-h1{font-size:42px;margin:8px 0 18px;font-family:Impact,Arial Black,sans-serif;color:#f6d0b5;text-shadow:3px 3px 0 #201430,0 0 15px #ffb86c;}
-.panel{border:1px solid rgba(127,255,235,.45);border-radius:14px;padding:12px;margin:10px 0;background:rgba(5,20,24,.72);}
-.panelTitle{font-size:15px;letter-spacing:1px;color:#ddd;margin-bottom:8px;}
-input,button{width:100%;padding:15px;margin:8px 0;border:none;border-radius:14px;font-size:18px;}
-input{background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.25);text-align:center;}
-button{color:white;font-weight:bold;background:#2ecc71;}
-#talkBtn{width:175px;height:175px;border-radius:50%;margin:22px auto;background:radial-gradient(circle,#25313b 0%,#101820 60%,#05080c 100%);border:3px solid rgba(255,150,70,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(255,120,50,.7),inset 0 0 30px rgba(255,255,255,.08);}
-#talkBtn:active{transform:scale(.96);}
-#talkMain{font-size:31px;font-weight:bold;}
-#talkSub{font-size:12px;margin-top:6px;color:#ffd7bf;}
-#status{font-size:24px;color:#ffd18a;margin:8px 0;}
-.wave{height:48px;margin:8px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);mask-image:repeating-linear-gradient(90deg,transparent 0 8px,black 8px 12px,transparent 12px 20px);opacity:.5;}
-.idText{font-size:18px;color:#d8f8ff;word-break:break-word;background:rgba(255,255,255,.1);border-radius:10px;padding:10px;}
-.user{background:rgba(255,255,255,.1);border:1px solid rgba(127,255,235,.35);padding:11px;border-radius:12px;margin:8px 0;text-align:left;}
-.small{color:#dfe6e9;font-size:14px;word-break:break-word;}
-#floatingSpeaker{position:fixed;top:25px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#7dff9b;padding:14px 22px;border-radius:999px;font-size:18px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 20px rgba(125,255,155,.5);}
-#loginBox{margin-top:80px;}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:#02070c;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:12px;
+
+  background:
+    radial-gradient(circle at top left,#2d1230,transparent 35%),
+    radial-gradient(circle at bottom right,#004d45,transparent 40%),
+    #02070c;
+}
+
+.card{
+  width:100%;
+  max-width:430px;
+  min-height:95vh;
+  border-radius:32px;
+  padding:18px;
+  text-align:center;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(12,18,27,.95),
+      rgba(5,35,35,.9)
+    );
+
+  border:1px solid rgba(135,255,235,.35);
+
+  box-shadow:
+    0 0 25px rgba(0,255,220,.18),
+    inset 0 0 30px rgba(255,255,255,.04);
+}
+
+h1{
+  font-size:42px;
+  margin:8px 0 18px;
+
+  font-family:
+    Impact,
+    Arial Black,
+    sans-serif;
+
+  color:#f6d0b5;
+
+  text-shadow:
+    3px 3px 0 #201430,
+    0 0 15px #ffb86c;
+}
+
+.panel{
+  border:1px solid rgba(127,255,235,.45);
+  border-radius:14px;
+  padding:12px;
+  margin:10px 0;
+  background:rgba(5,20,24,.72);
+}
+
+.panelTitle{
+  font-size:15px;
+  letter-spacing:1px;
+  color:#ddd;
+  margin-bottom:8px;
+}
+
+input,button{
+  width:100%;
+  padding:15px;
+  margin:8px 0;
+  border:none;
+  border-radius:14px;
+  font-size:18px;
+}
+
+input{
+  background:rgba(255,255,255,.12);
+  color:white;
+  border:1px solid rgba(255,255,255,.25);
+  text-align:center;
+}
+
+button{
+  color:white;
+  font-weight:bold;
+  background:#2ecc71;
+}
+
+#talkBtn{
+  width:175px;
+  height:175px;
+  border-radius:50%;
+  margin:22px auto;
+
+  background:
+    radial-gradient(
+      circle,
+      #25313b 0%,
+      #101820 60%,
+      #05080c 100%
+    );
+
+  border:3px solid rgba(255,150,70,.9);
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:
+    0 0 30px rgba(255,120,50,.7),
+    inset 0 0 30px rgba(255,255,255,.08);
+
+  transition:.12s;
+}
+
+#talkBtn:active{
+  transform:scale(.96);
+}
+
+.transmitting{
+
+  border:3px solid #00ff88 !important;
+
+  box-shadow:
+    0 0 18px #00ff88,
+    0 0 35px rgba(0,255,136,.7),
+    inset 0 0 18px rgba(0,255,136,.25) !important;
+
+}
+
+.transmitting #talkMain{
+
+  color:#00ff88 !important;
+
+  text-shadow:
+    0 0 12px rgba(0,255,136,.9);
+
+}
+
+#talkMain{
+  font-size:31px;
+  font-weight:bold;
+}
+
+#talkSub{
+  font-size:12px;
+  margin-top:6px;
+  color:#ffd7bf;
+}
+
+#status{
+  font-size:24px;
+  color:#ffd18a;
+  margin:8px 0;
+}
+
+.wave{
+  height:48px;
+  margin:8px 0;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.7),
+      transparent
+    );
+
+  mask-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 8px,
+      black 8px 12px,
+      transparent 12px 20px
+    );
+
+  opacity:.5;
+}
+
+.idText{
+  font-size:18px;
+  color:#d8f8ff;
+  word-break:break-word;
+  background:rgba(255,255,255,.1);
+  border-radius:10px;
+  padding:10px;
+}
+
+.user{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(127,255,235,.35);
+  padding:11px;
+  border-radius:12px;
+  margin:8px 0;
+  text-align:left;
+}
+
+.small{
+  color:#dfe6e9;
+  font-size:14px;
+}
+
+#floatingSpeaker{
+  position:fixed;
+  top:25px;
+  left:50%;
+
+  transform:translateX(-50%);
+
+  background:rgba(0,0,0,.8);
+
+  color:#7dff9b;
+
+  padding:14px 22px;
+
+  border-radius:999px;
+
+  font-size:18px;
+  font-weight:bold;
+
+  z-index:9999;
+
+  display:none;
+
+  box-shadow:
+    0 0 20px rgba(125,255,155,.5);
+}
+
 </style>
 </head>
 
 <body>
 
-<div id="floatingSpeaker">🎙️ Hablando...</div>
+<div id="floatingSpeaker">
+  🎙️ Hablando...
+</div>
 
 <div class="card">
+
   <h1>📻 Walkie Pro</h1>
 
   <div id="loginBox">
+
     <div class="panel">
-      <div class="panelTitle">ENTRAR A LA SALA</div>
-      <input id="nameInput" placeholder="Tu nombre">
-      <input id="roomInput" value="radio-mike" placeholder="Sala">
-      <button onclick="joinRoom()">ENTRAR</button>
-      <p class="small">Tu nombre, sala e ID quedan guardados.</p>
+
+      <div class="panelTitle">
+        ENTRAR A LA SALA
+      </div>
+
+      <input
+      id="nameInput"
+      placeholder="Tu nombre">
+
+      <input
+      id="roomInput"
+      value="radio-mike"
+      placeholder="Sala">
+
+      <button onclick="joinRoom()">
+        ENTRAR
+      </button>
+
     </div>
+
   </div>
 
-  <div id="radioBox" style="display:none;">
+  <div
+  id="radioBox"
+  style="display:none;">
+
     <div class="panel">
-      <div class="panelTitle">DETALLES DE LA SALA</div>
-      <p><b>Sala:</b> <span id="roomLabel"></span></p>
-      <p><b>Usuario:</b> <span id="nameLabel"></span></p>
+
+      <p>
+        <b>Sala:</b>
+        <span id="roomLabel"></span>
+      </p>
+
+      <p>
+        <b>Usuario:</b>
+        <span id="nameLabel"></span>
+      </p>
+
     </div>
 
     <div class="panel">
-      <div class="panelTitle">IDENTIFICACIÓN DEL DISPOSITIVO</div>
-      <p><b>ID del dispositivo:</b></p>
-      <div class="idText" id="deviceIdLabel">...</div>
-      <p><b>ID Radio:</b> <span id="myIdLabel">...</span></p>
+
+      <p>
+        <b>ID dispositivo:</b>
+      </p>
+
+      <div
+      class="idText"
+      id="deviceIdLabel">
+      </div>
+
+      <p>
+        <b>ID Radio:</b>
+        <span id="myIdLabel"></span>
+      </p>
+
     </div>
 
     <div class="wave"></div>
 
     <button id="talkBtn">
-      <span id="talkMain">HABLAR</span>
-      <span id="talkSub">Esperando transmisión</span>
+
+      <span id="talkMain">
+        HABLAR
+      </span>
+
+      <span id="talkSub">
+        Esperando transmisión
+      </span>
+
     </button>
 
     <div class="panel">
-      <div class="panelTitle">ESTADO DE CONEXIÓN</div>
-      <div id="status">🟢 CONECTADO</div>
+
+      <div id="status">
+        🟢 CONECTADO
+      </div>
+
     </div>
 
     <div class="panel">
-      <div class="panelTitle">LISTA DE USUARIOS</div>
-      <h3>Usuarios conectados</h3>
+
+      <h3>
+        Usuarios conectados
+      </h3>
+
       <div id="usersBox"></div>
+
     </div>
+
   </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
 <script>
-let socket,peer,localStream;
-let room="",myName="",myPeerId="",myDeviceId="";
-let calls={},users={};
 
-const loginBox=document.getElementById("loginBox");
-const radioBox=document.getElementById("radioBox");
-const nameInput=document.getElementById("nameInput");
-const roomInput=document.getElementById("roomInput");
-const roomLabel=document.getElementById("roomLabel");
-const nameLabel=document.getElementById("nameLabel");
-const myIdLabel=document.getElementById("myIdLabel");
-const deviceIdLabel=document.getElementById("deviceIdLabel");
-const usersBox=document.getElementById("usersBox");
-const talkBtn=document.getElementById("talkBtn");
-const talkMain=document.getElementById("talkMain");
-const talkSub=document.getElementById("talkSub");
-const floatingSpeaker=document.getElementById("floatingSpeaker");
+let socket;
+let peer;
+let localStream;
 
-const motorolaStart=new Audio("./assets/motorola-start.mp3");
-const motorolaEnd=new Audio("./assets/motorola-end.mp3");
+let room="";
+let myName="";
+let myPeerId="";
+let myDeviceId="";
 
-motorolaStart.volume=1;
-motorolaEnd.volume=1;
+let calls={};
+let users={};
+
+const loginBox =
+document.getElementById(
+  "loginBox"
+);
+
+const radioBox =
+document.getElementById(
+  "radioBox"
+);
+
+const nameInput =
+document.getElementById(
+  "nameInput"
+);
+
+const roomInput =
+document.getElementById(
+  "roomInput"
+);
+
+const roomLabel =
+document.getElementById(
+  "roomLabel"
+);
+
+const nameLabel =
+document.getElementById(
+  "nameLabel"
+);
+
+const myIdLabel =
+document.getElementById(
+  "myIdLabel"
+);
+
+const deviceIdLabel =
+document.getElementById(
+  "deviceIdLabel"
+);
+
+const usersBox =
+document.getElementById(
+  "usersBox"
+);
+
+const talkBtn =
+document.getElementById(
+  "talkBtn"
+);
+
+const talkMain =
+document.getElementById(
+  "talkMain"
+);
+
+const talkSub =
+document.getElementById(
+  "talkSub"
+);
+
+const floatingSpeaker =
+document.getElementById(
+  "floatingSpeaker"
+);
+
+const motorolaStart =
+new Audio(
+  "./assets/motorola-start.mp3"
+);
+
+const motorolaEnd =
+new Audio(
+  "./assets/motorola-end.mp3"
+);
+
 motorolaStart.preload="auto";
 motorolaEnd.preload="auto";
 
-motorolaStart.load();
-motorolaEnd.load();
-
 function playSound(type){
-  const sound = type === "start" ? motorolaStart : motorolaEnd;
+
+  const sound =
+  type==="start"
+  ?motorolaStart
+  :motorolaEnd;
 
   try{
-    sound.currentTime = 0;
-    sound.volume = 1;
-    sound.play().catch(()=>radioBeep(type));
-  }catch{
-    radioBeep(type);
-  }
+
+    sound.currentTime=0;
+
+    sound.play();
+
+  }catch{}
+
 }
 
 function showSpeaker(name){
-  floatingSpeaker.innerText="🎙️ "+name+" está hablando";
-  floatingSpeaker.style.display="block";
+
+  floatingSpeaker.innerText =
+  "🎙️ "+
+  name+
+  " está hablando";
+
+  floatingSpeaker.style.display =
+  "block";
+
 }
 
 function hideSpeaker(){
-  floatingSpeaker.style.display="none";
-}
 
-function radioBeep(type){
-  const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  const duration=type==="start"?0.32:0.42;
-  const bufferSize=audioCtx.sampleRate*duration;
-  const buffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
-  const data=buffer.getChannelData(0);
+  floatingSpeaker.style.display =
+  "none";
 
-  for(let i=0;i<bufferSize;i++){
-    data[i]=(Math.random()*2-1)*0.9;
-  }
-
-  const noise=audioCtx.createBufferSource();
-  noise.buffer=buffer;
-
-  const filter=audioCtx.createBiquadFilter();
-  filter.type="bandpass";
-  filter.frequency.value=type==="start"?1800:1200;
-
-  const gain=audioCtx.createGain();
-  gain.gain.setValueAtTime(.9,audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+duration);
-
-  noise.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
-  noise.start();
-  noise.stop(audioCtx.currentTime+duration);
 }
 
 function getFixedDeviceId(){
-  let id=localStorage.getItem("walkie_device_id");
+
+  let id =
+  localStorage.getItem(
+    "walkie_device_id"
+  );
+
   if(!id){
-    id="device-"+crypto.randomUUID();
-    localStorage.setItem("walkie_device_id",id);
+
+    id =
+    "device-" +
+    crypto.randomUUID();
+
+    localStorage.setItem(
+      "walkie_device_id",
+      id
+    );
+
   }
+
   return id;
+
 }
 
 function getFixedPeerId(){
-  let id=localStorage.getItem("walkie_peer_id");
+
+  let id =
+  localStorage.getItem(
+    "walkie_peer_id"
+  );
+
   if(!id){
-    id="radio-"+getFixedDeviceId().replace("device-","").replace(/-/g,"").substring(0,14);
-    localStorage.setItem("walkie_peer_id",id);
+
+    id =
+    "radio-" +
+    getFixedDeviceId()
+    .replace(
+      "device-",
+      ""
+    )
+    .replace(
+      /-/g,
+      ""
+    )
+    .substring(
+      0,
+      14
+    );
+
+    localStorage.setItem(
+      "walkie_peer_id",
+      id
+    );
+
   }
+
   return id;
-}
 
-function loadSavedData(){
-  const savedName=localStorage.getItem("walkie_name");
-  const savedRoom=localStorage.getItem("walkie_room");
-  if(savedName) nameInput.value=savedName;
-  if(savedRoom) roomInput.value=savedRoom;
-}
-
-function saveUserData(){
-  localStorage.setItem("walkie_name",myName);
-  localStorage.setItem("walkie_room",room);
 }
 
 async function prepareMic(){
-  localStream=await navigator.mediaDevices.getUserMedia({
+
+  localStream =
+  await navigator
+  .mediaDevices
+  .getUserMedia({
+
     audio:true,
     video:false
+
   });
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=false;
-  });
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
+
+      track.enabled=false;
+
+    }
+  );
+
 }
 
-function createAudio(peerId,stream){
-  let audio=document.getElementById("audio-"+peerId);
+function createAudio(
+  peerId,
+  stream
+){
+
+  let audio =
+  document.getElementById(
+    "audio-"+peerId
+  );
+
   if(!audio){
-    audio=document.createElement("audio");
-    audio.id="audio-"+peerId;
+
+    audio =
+    document.createElement(
+      "audio"
+    );
+
+    audio.id =
+    "audio-"+peerId;
+
     audio.autoplay=true;
+
     audio.playsInline=true;
-    document.body.appendChild(audio);
-  }
-  audio.srcObject=stream;
-  audio.volume=1;
-  audio.muted=false;
-  audio.play().catch(()=>{});
-}
 
-function addUser(peerId,name,deviceId){
-  if(peerId===myPeerId)return;
-  users[peerId]={name,deviceId};
-  renderUsers();
-}
+    document.body.appendChild(
+      audio
+    );
 
-function removeUser(peerId){
-  delete users[peerId];
-  if(calls[peerId]){
-    calls[peerId].close();
-    delete calls[peerId];
   }
-  const audio=document.getElementById("audio-"+peerId);
-  if(audio)audio.remove();
-  renderUsers();
+
+  audio.srcObject =
+  stream;
+
+  audio.play();
+
 }
 
 function renderUsers(){
-  usersBox.innerHTML="";
-  const ids=Object.keys(users);
 
-  if(ids.length===0){
-    usersBox.innerHTML="<p class='small'>Waiting for others...</p>";
-    return;
-  }
+  usersBox.innerHTML="";
+
+  const ids =
+  Object.keys(users);
 
   ids.forEach(id=>{
-    const div=document.createElement("div");
-    div.className="user";
-    div.innerHTML=`<b>🟢 ${users[id].name}</b><br><span class="small">${users[id].deviceId}</span>`;
-    usersBox.appendChild(div);
+
+    const div =
+    document.createElement(
+      "div"
+    );
+
+    div.className =
+    "user";
+
+    div.innerHTML =
+    `
+    <b>🟢 ${users[id].name}</b>
+    `;
+
+    usersBox.appendChild(
+      div
+    );
+
   });
+
 }
 
-function callUser(peerId){
-  if(calls[peerId])return;
+function addUser(
+  peerId,
+  name
+){
 
-  const call=peer.call(peerId,localStream);
+  if(
+    peerId===myPeerId
+  ) return;
 
-  call.on("stream",remoteStream=>{
-    createAudio(peerId,remoteStream);
-  });
+  users[
+    peerId
+  ] = {
 
-  calls[peerId]=call;
+    name
+
+  };
+
+  renderUsers();
+
 }
 
 async function joinRoom(){
-  myName=nameInput.value.trim();
-  room=roomInput.value.trim();
 
-  if(!myName||!room){
-    alert("Completa los datos");
+  myName =
+  nameInput.value.trim();
+
+  room =
+  roomInput.value.trim();
+
+  if(
+    !myName ||
+    !room
+  ){
+
+    alert(
+      "Completa los datos"
+    );
+
     return;
+
   }
 
-  saveUserData();
+  await prepareMic();
 
-  try{
-    await prepareMic();
+  loginBox.style.display =
+  "none";
 
-    motorolaStart.load();
-    motorolaEnd.load();
+  radioBox.style.display =
+  "block";
 
-    try{
-      motorolaStart.currentTime=0;
-      motorolaEnd.currentTime=0;
-    }catch{}
+  myDeviceId =
+  getFixedDeviceId();
 
-  }catch{
-    alert("Debes permitir el micrófono.");
-    return;
-  }
+  roomLabel.innerText =
+  room;
 
-  loginBox.style.display="none";
-  radioBox.style.display="block";
+  nameLabel.innerText =
+  myName;
 
-  myDeviceId=getFixedDeviceId();
-  roomLabel.innerText=room;
-  nameLabel.innerText=myName;
-  deviceIdLabel.innerText=myDeviceId;
+  deviceIdLabel.innerText =
+  myDeviceId;
 
-  socket=io();
-  myPeerId=getFixedPeerId();
+  socket = io();
 
-  peer=new Peer(myPeerId,{
-    host:location.hostname,
-    port:location.port||(location.protocol==="https:"?443:80),
-    path:"/peerjs",
-    secure:location.protocol==="https:",
-    config:{
-      iceServers:[
-        {urls:"stun:stun.l.google.com:19302"},
-        {urls:"stun:stun1.l.google.com:19302"},
-        {urls:"stun:stun2.l.google.com:19302"}
-      ]
+  myPeerId =
+  getFixedPeerId();
+
+  peer =
+  new Peer(
+    myPeerId,
+    {
+
+      host:
+      location.hostname,
+
+      port:
+      location.port ||
+      (
+        location.protocol==="https:"
+        ?443
+        :80
+      ),
+
+      path:
+      "/peerjs",
+
+      secure:
+      location.protocol==="https:"
+
     }
-  });
+  );
 
-  peer.on("open",id=>{
-    myPeerId=id;
-    myIdLabel.innerText=id;
+  peer.on(
+    "open",
+    id=>{
 
-    socket.emit("join-room",{
-      room,
-      peerId:id,
-      name:myName,
-      deviceId:myDeviceId
-    });
-  });
+      myIdLabel.innerText =
+      id;
 
-  peer.on("call",call=>{
-    call.answer(localStream);
-    call.on("stream",remoteStream=>{
-      createAudio(call.peer,remoteStream);
-    });
-    calls[call.peer]=call;
-  });
+      socket.emit(
+        "join-room",
+        {
 
-  socket.on("users-in-room",existingUsers=>{
-    existingUsers.forEach(user=>{
-      addUser(user.peerId,user.name,user.deviceId);
-      callUser(user.peerId);
-    });
-  });
+          room,
 
-  socket.on("user-joined",user=>{
-    addUser(user.peerId,user.name,user.deviceId);
-  });
+          peerId:id,
 
-  socket.on("user-left",peerId=>{
-    removeUser(peerId);
-  });
+          name:myName,
 
-  socket.on("user-talking",data=>{
-    playSound("start");
-    showSpeaker(data.name);
-  });
+          deviceId:
+          myDeviceId
 
-  socket.on("user-stopped-talking",()=>{
-    playSound("end");
-    hideSpeaker();
-  });
+        }
+      );
+
+    }
+  );
+
+  peer.on(
+    "call",
+    call=>{
+
+      call.answer(
+        localStream
+      );
+
+      call.on(
+        "stream",
+        remoteStream=>{
+
+          createAudio(
+            call.peer,
+            remoteStream
+          );
+
+        }
+      );
+
+      calls[
+        call.peer
+      ] = call;
+
+    }
+  );
+
+  socket.on(
+    "users-in-room",
+    existingUsers=>{
+
+      existingUsers
+      .forEach(
+        user=>{
+
+          addUser(
+            user.peerId,
+            user.name
+          );
+
+          const call =
+          peer.call(
+            user.peerId,
+            localStream
+          );
+
+          call.on(
+            "stream",
+            remoteStream=>{
+
+              createAudio(
+                user.peerId,
+                remoteStream
+              );
+
+            }
+          );
+
+          calls[
+            user.peerId
+          ] = call;
+
+        }
+      );
+
+    }
+  );
+
+  socket.on(
+    "user-joined",
+    user=>{
+
+      addUser(
+        user.peerId,
+        user.name
+      );
+
+    }
+  );
+
+  socket.on(
+    "user-talking",
+    data=>{
+
+      showSpeaker(
+        data.name
+      );
+
+    }
+  );
+
+  socket.on(
+    "user-stopped-talking",
+    ()=>{
+
+      hideSpeaker();
+
+    }
+  );
+
 }
 
 function startTalking(){
-  if(!localStream)return;
 
-  playSound("start");
+  playSound(
+    "start"
+  );
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=true;
-  });
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
 
-  talkMain.innerText="TRANSMITIENDO";
-  talkSub.style.display="none";
-  showSpeaker(myName);
+      track.enabled=true;
 
-  if(socket){
-    socket.emit("talking-start",{room,name:myName});
-  }
+    }
+  );
+
+  talkMain.innerText =
+  "TRANSMITIENDO";
+
+  talkSub.style.display =
+  "none";
+
+  talkBtn.classList.add(
+    "transmitting"
+  );
+
+  showSpeaker(
+    myName
+  );
+
+  socket.emit(
+    "talking-start",
+    {
+
+      room,
+
+      name:myName
+
+    }
+  );
+
 }
 
 function stopTalking(){
-  if(!localStream)return;
 
-  playSound("end");
+  playSound(
+    "end"
+  );
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=false;
-  });
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
 
-  talkMain.innerText="HABLAR";
-  talkSub.style.display="block";
+      track.enabled=false;
+
+    }
+  );
+
+  talkMain.innerText =
+  "HABLAR";
+
+  talkSub.style.display =
+  "block";
+
+  talkBtn.classList.remove(
+    "transmitting"
+  );
+
   hideSpeaker();
 
-  if(socket){
-    socket.emit("talking-stop",{room,name:myName});
-  }
+  socket.emit(
+    "talking-stop",
+    {
+
+      room,
+
+      name:myName
+
+    }
+  );
+
 }
 
-talkBtn.addEventListener("touchstart",e=>{
-  e.preventDefault();
-  startTalking();
-});
+talkBtn
+.addEventListener(
+  "touchstart",
+  e=>{
 
-talkBtn.addEventListener("touchend",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    e.preventDefault();
 
-talkBtn.addEventListener("touchcancel",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    startTalking();
 
-talkBtn.addEventListener("mousedown",e=>{
-  e.preventDefault();
-  startTalking();
-});
+  }
+);
 
-talkBtn.addEventListener("mouseup",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+talkBtn
+.addEventListener(
+  "touchend",
+  e=>{
 
-talkBtn.addEventListener("mouseleave",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    e.preventDefault();
 
-loadSavedData();
+    stopTalking();
+
+  }
+);
+
+talkBtn
+.addEventListener(
+  "mousedown",
+  e=>{
+
+    e.preventDefault();
+
+    startTalking();
+
+  }
+);
+
+talkBtn
+.addEventListener(
+  "mouseup",
+  e=>{
+
+    e.preventDefault();
+
+    stopTalking();
+
+  }
+);
+
 </script>
 
 </body>
