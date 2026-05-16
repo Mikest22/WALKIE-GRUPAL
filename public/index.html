@@ -89,6 +89,14 @@ button{
 .small{
   color:#dfe6e9;
   font-size:15px;
+  word-break:break-word;
+}
+
+.idbox{
+  background:#0d2746;
+  padding:10px;
+  border-radius:12px;
+  margin:10px 0;
 }
 </style>
 </head>
@@ -102,12 +110,19 @@ button{
     <input id="nameInput" placeholder="Tu nombre">
     <input id="roomInput" value="radio-mike" placeholder="Nombre de sala">
     <button onclick="joinRoom()">ENTRAR A LA SALA</button>
-    <p class="small">Funciona con WiFi y datos móviles si Render está en HTTPS.</p>
+    <p class="small">Tu nombre y sala se guardan automáticamente en este dispositivo.</p>
   </div>
 
   <div id="radioBox" style="display:none;">
     <p><b>Sala:</b> <span id="roomLabel"></span></p>
-    <p><b>Tu ID:</b> <span id="myIdLabel">...</span></p>
+    <p><b>Usuario:</b> <span id="nameLabel"></span></p>
+
+    <div class="idbox">
+      <p class="small"><b>ID del dispositivo:</b></p>
+      <p class="small" id="deviceIdLabel">...</p>
+    </div>
+
+    <p><b>Tu ID de radio:</b> <span id="myIdLabel">...</span></p>
 
     <button id="talkBtn">HABLAR</button>
 
@@ -130,6 +145,7 @@ let localStream;
 let room = "";
 let myName = "";
 let myPeerId = "";
+let myDeviceId = "";
 let calls = {};
 let users = {};
 
@@ -138,7 +154,9 @@ const radioBox = document.getElementById("radioBox");
 const nameInput = document.getElementById("nameInput");
 const roomInput = document.getElementById("roomInput");
 const roomLabel = document.getElementById("roomLabel");
+const nameLabel = document.getElementById("nameLabel");
 const myIdLabel = document.getElementById("myIdLabel");
+const deviceIdLabel = document.getElementById("deviceIdLabel");
 const statusBox = document.getElementById("status");
 const usersBox = document.getElementById("usersBox");
 const talkBtn = document.getElementById("talkBtn");
@@ -147,15 +165,54 @@ function setStatus(text){
   statusBox.innerText = text;
 }
 
+function getFixedDeviceId(){
+  let id = localStorage.getItem("walkie_device_id");
+
+  if(!id){
+    if(window.crypto && crypto.randomUUID){
+      id = "device-" + crypto.randomUUID();
+    }else{
+      id = "device-" + Date.now() + "-" + Math.random().toString(36).substring(2, 12);
+    }
+
+    localStorage.setItem("walkie_device_id", id);
+  }
+
+  return id;
+}
+
 function getFixedPeerId(){
   let id = localStorage.getItem("walkie_grupal_peer_id");
 
   if(!id){
-    id = "radio-" + Math.random().toString(36).substring(2, 10);
+    const base = getFixedDeviceId()
+      .replace("device-", "")
+      .replace(/-/g, "")
+      .substring(0, 14);
+
+    id = "radio-" + base;
     localStorage.setItem("walkie_grupal_peer_id", id);
   }
 
   return id;
+}
+
+function loadSavedData(){
+  const savedName = localStorage.getItem("walkie_user_name");
+  const savedRoom = localStorage.getItem("walkie_room_name");
+
+  if(savedName){
+    nameInput.value = savedName;
+  }
+
+  if(savedRoom){
+    roomInput.value = savedRoom;
+  }
+}
+
+function saveUserData(){
+  localStorage.setItem("walkie_user_name", myName);
+  localStorage.setItem("walkie_room_name", room);
 }
 
 async function prepareMic(){
@@ -193,10 +250,14 @@ function createAudio(peerId, stream){
   });
 }
 
-function addUser(peerId, name){
+function addUser(peerId, name, deviceId){
   if(peerId === myPeerId) return;
 
-  users[peerId] = name;
+  users[peerId] = {
+    name:name,
+    deviceId:deviceId
+  };
+
   renderUsers();
 }
 
@@ -227,7 +288,12 @@ function renderUsers(){
   ids.forEach(id=>{
     const div = document.createElement("div");
     div.className = "user";
-    div.innerText = users[id];
+
+    div.innerHTML = `
+      <b>${users[id].name}</b><br>
+      <span class="small">${users[id].deviceId || "Sin ID"}</span>
+    `;
+
     usersBox.appendChild(div);
   });
 }
@@ -258,6 +324,8 @@ async function joinRoom(){
     return;
   }
 
+  saveUserData();
+
   try{
     await prepareMic();
   }catch{
@@ -268,7 +336,11 @@ async function joinRoom(){
   loginBox.style.display = "none";
   radioBox.style.display = "block";
 
+  myDeviceId = getFixedDeviceId();
+
   roomLabel.innerText = room;
+  nameLabel.innerText = myName;
+  deviceIdLabel.innerText = myDeviceId;
 
   socket = io();
 
@@ -293,9 +365,10 @@ async function joinRoom(){
     myIdLabel.innerText = id;
 
     socket.emit("join-room", {
-      room,
+      room:room,
       peerId:id,
-      name:myName
+      name:myName,
+      deviceId:myDeviceId
     });
 
     setStatus("Conectado. Esperando transmisión.");
@@ -315,7 +388,7 @@ async function joinRoom(){
   peer.on("error", error=>{
     if(error.type === "unavailable-id"){
       localStorage.removeItem("walkie_grupal_peer_id");
-      alert("Tu ID estaba repetido. Recarga la página.");
+      alert("Tu ID de radio estaba repetido o abierto en otra pestaña. Cierra otras pestañas y recarga.");
     }else{
       setStatus("Error: " + error.type);
     }
@@ -323,13 +396,13 @@ async function joinRoom(){
 
   socket.on("users-in-room", existingUsers=>{
     existingUsers.forEach(user=>{
-      addUser(user.peerId, user.name);
+      addUser(user.peerId, user.name, user.deviceId);
       callUser(user.peerId);
     });
   });
 
   socket.on("user-joined", user=>{
-    addUser(user.peerId, user.name);
+    addUser(user.peerId, user.name, user.deviceId);
   });
 
   socket.on("user-left", peerId=>{
@@ -389,6 +462,8 @@ talkBtn.addEventListener("mouseleave", e=>{
   e.preventDefault();
   stopTalking();
 });
+
+loadSavedData();
 </script>
 
 </body>
