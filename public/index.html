@@ -210,52 +210,34 @@ async function joinRoom(){
   myPeerId = getFixedId();
 
   peer = new Peer(myPeerId, {
-    host: location.hostname,
-    port: location.port || (location.protocol === "https:" ? 443 : 80),
-    path: "/peerjs"
-  });
-
-  peer.on("open", id=>{
-    myPeerIdSpan.innerText = id;
-    setStatus("Conectado a la sala.");
-
-    socket.emit("join-room", {
-      room,
-      peerId: id,
-      name: userName
-    });
-  });
-
-  peer.on("call", call=>{
-    call.answer(localStream);
-
-    call.on("stream", remoteStream=>{
-      playRemoteStream(remoteStream, call.peer);
-    });
-
-    calls[call.peer] = call;
-  });
-
-  peer.on("error", error=>{
-    setStatus("Error: " + error.type);
-  });
+  host: location.hostname,
+  port: location.port || (location.protocol === "https:" ? 443 : 80),
+  path: "/peerjs",
+  secure: location.protocol === "https:",
+  config: {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" }
+    ]
+  }
+});
 
   socket.on("user-connected", data=>{
     addUser(data.peerId, data.name);
 
-    const call = peer.call(data.peerId, localStream);
+socket.on("existing-users", users => {
+  users.forEach(user => {
+    addUser(user.peerId, user.name);
 
-    call.on("stream", remoteStream=>{
-      playRemoteStream(remoteStream, data.peerId);
+    const call = peer.call(user.peerId, localStream);
+
+    call.on("stream", remoteStream => {
+      playRemoteStream(remoteStream, user.peerId);
     });
 
-    calls[data.peerId] = call;
+    calls[user.peerId] = call;
   });
-
-  socket.on("user-disconnected", peerId=>{
-    removeUser(peerId);
-  });
-}
+});
 
 function startTalking(){
   if(!localStream){
