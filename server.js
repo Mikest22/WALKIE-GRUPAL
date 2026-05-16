@@ -17,9 +17,21 @@ const peerServer = ExpressPeerServer(server, {
 
 app.use("/peerjs", peerServer);
 
+let rooms = {};
+
 io.on("connection", socket => {
   socket.on("join-room", ({ room, peerId, name }) => {
     socket.join(room);
+
+    if (!rooms[room]) rooms[room] = [];
+
+    socket.emit("existing-users", rooms[room]);
+
+    rooms[room].push({
+      socketId: socket.id,
+      peerId,
+      name
+    });
 
     socket.to(room).emit("user-connected", {
       peerId,
@@ -27,6 +39,7 @@ io.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
+      rooms[room] = rooms[room].filter(user => user.socketId !== socket.id);
       socket.to(room).emit("user-disconnected", peerId);
     });
   });
