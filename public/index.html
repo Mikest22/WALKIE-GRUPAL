@@ -382,8 +382,8 @@ motorolaStart.preload = "auto";
 motorolaEnd.preload = "auto";
 motorolaStart.volume = 1;
 motorolaEnd.volume = 1;
-motorolaStart.load();
-motorolaEnd.load();
+
+let audioUnlocked = false;
 
 let socket;
 let peer;
@@ -395,7 +395,6 @@ let myDeviceId = "";
 let users = {};
 let calls = {};
 let isTalking = false;
-let activePointerId = null;
 
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
@@ -403,6 +402,36 @@ const talkSub = document.getElementById("talkSub");
 
 talkBtn.addEventListener("selectstart", e => e.preventDefault());
 talkBtn.addEventListener("contextmenu", e => e.preventDefault());
+
+function unlockSounds(){
+  if(audioUnlocked) return;
+
+  audioUnlocked = true;
+
+  try{
+    motorolaStart.load();
+    motorolaEnd.load();
+
+    motorolaStart.muted = true;
+    motorolaEnd.muted = true;
+
+    motorolaStart.play().then(()=>{
+      motorolaStart.pause();
+      motorolaStart.currentTime = 0;
+      motorolaStart.muted = false;
+    }).catch(()=>{ motorolaStart.muted = false; });
+
+    motorolaEnd.play().then(()=>{
+      motorolaEnd.pause();
+      motorolaEnd.currentTime = 0;
+      motorolaEnd.muted = false;
+    }).catch(()=>{ motorolaEnd.muted = false; });
+
+  }catch{
+    motorolaStart.muted = false;
+    motorolaEnd.muted = false;
+  }
+}
 
 function instantBeep(type){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -412,30 +441,29 @@ function instantBeep(type){
   osc.type = "square";
   osc.frequency.value = type === "start" ? 1200 : 650;
 
-  gain.gain.setValueAtTime(0.20, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.16, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
 
   osc.connect(gain);
   gain.connect(ctx.destination);
 
   osc.start();
-  osc.stop(ctx.currentTime + 0.08);
+  osc.stop(ctx.currentTime + 0.05);
 }
 
 function playSound(type){
-  instantBeep(type);
-
-  const src = type === "start"
-    ? "./assets/motorola-start.mp3"
-    : "./assets/motorola-end.mp3";
+  const sound = type === "start" ? motorolaStart : motorolaEnd;
 
   try{
-    const sound = new Audio(src);
-    sound.preload = "auto";
-    sound.volume = 1;
+    sound.pause();
     sound.currentTime = 0;
-    sound.play().catch(()=>{});
-  }catch{}
+    sound.volume = 1;
+    sound.play().catch(()=>{
+      instantBeep(type);
+    });
+  }catch{
+    instantBeep(type);
+  }
 }
 
 function getDeviceId(){
@@ -478,6 +506,8 @@ async function joinRoom(){
     alert("Completa los datos");
     return;
   }
+
+  unlockSounds();
 
   localStorage.setItem("walkie_name", myName);
   localStorage.setItem("walkie_room", room);
@@ -632,7 +662,6 @@ function renderUsers(){
 function startTalking(pointerId=null){
   if(isTalking) return;
   isTalking = true;
-  activePointerId = pointerId;
 
   playSound("start");
 
@@ -653,7 +682,6 @@ function startTalking(pointerId=null){
 function stopTalking(){
   if(!isTalking) return;
   isTalking = false;
-  activePointerId = null;
 
   playSound("end");
 
