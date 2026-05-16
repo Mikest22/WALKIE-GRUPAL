@@ -3,437 +3,867 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Walkie Grupal Pro</title>
+<title>Walkie Pro</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
 html,body{
-  margin:0;padding:0;width:100%;min-height:100%;
-  background:#061527;color:white;font-family:Arial,sans-serif;
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
+  background:#061527;
+  color:white;
+  font-family:Arial,sans-serif;
 }
-body{display:flex;justify-content:center;align-items:center;padding:15px;}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
 .card{
-  width:100%;max-width:430px;background:#183b64;
-  border-radius:26px;padding:20px;text-align:center;
+  width:100%;
+  max-width:430px;
+  background:#183b64;
+  border-radius:26px;
+  padding:20px;
+  text-align:center;
 }
-h1{font-size:34px;margin:10px 0 20px;}
+
+h1{
+  font-size:34px;
+  margin:10px 0 20px;
+}
+
 input,button{
-  width:100%;padding:16px;margin:8px 0;border:none;
-  border-radius:16px;font-size:18px;
+  width:100%;
+  padding:16px;
+  margin:8px 0;
+  border:none;
+  border-radius:16px;
+  font-size:18px;
 }
-button{color:white;font-weight:bold;background:#2ecc71;}
+
+button{
+  color:white;
+  font-weight:bold;
+  background:#2ecc71;
+}
+
 #talkBtn{
-  width:250px;height:250px;border-radius:50%;background:#ef3340;
-  font-size:42px;box-shadow:0 12px 0 #8d1520;
-  margin:25px auto;display:block;
+  width:250px;
+  height:250px;
+  border-radius:50%;
+  background:#ef3340;
+  margin:25px auto;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 12px 0 #8d1520;
 }
-#talkBtn:active{transform:translateY(8px);box-shadow:0 3px 0 #8d1520;}
-#status{color:#ffd166;font-size:24px;margin:15px 0;}
-.user{background:#0d2746;padding:10px;border-radius:12px;margin:8px 0;}
-.small{color:#dfe6e9;font-size:15px;word-break:break-word;}
-.idbox{background:#0d2746;padding:10px;border-radius:12px;margin:10px 0;}
+
+#talkBtn:active{
+  transform:translateY(8px);
+  box-shadow:0 3px 0 #8d1520;
+}
+
+#talkMain{
+  font-size:38px;
+  font-weight:bold;
+}
+
+#talkSub{
+  font-size:14px;
+  margin-top:8px;
+  opacity:.95;
+}
+
+#status{
+  font-size:24px;
+  color:#7dff9b;
+  margin:15px 0;
+  font-weight:bold;
+}
+
+.user{
+  background:#0d2746;
+  padding:10px;
+  border-radius:12px;
+  margin:8px 0;
+}
+
+.small{
+  color:#dfe6e9;
+  font-size:15px;
+  word-break:break-word;
+}
+
+.idbox{
+  background:#0d2746;
+  padding:10px;
+  border-radius:12px;
+  margin:10px 0;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="card">
+
   <h1>📻 Walkie Pro</h1>
 
   <div id="loginBox">
+
     <input id="nameInput" placeholder="Tu nombre">
+
     <input id="roomInput" value="radio-mike" placeholder="Sala">
+
     <button onclick="joinRoom()">ENTRAR</button>
-    <p class="small">Tu nombre, sala e ID quedan guardados en este dispositivo.</p>
+
+    <p class="small">
+      Tu nombre, sala e ID quedan guardados.
+    </p>
+
   </div>
 
   <div id="radioBox" style="display:none;">
+
     <p><b>Sala:</b> <span id="roomLabel"></span></p>
+
     <p><b>Usuario:</b> <span id="nameLabel"></span></p>
 
     <div class="idbox">
+
       <p class="small"><b>ID del dispositivo:</b></p>
+
       <p class="small" id="deviceIdLabel">...</p>
+
     </div>
 
     <p><b>ID Radio:</b> <span id="myIdLabel">...</span></p>
 
-    <button id="talkBtn">HABLAR</button>
+    <button id="talkBtn">
 
-    <div id="status">Conectando...</div>
+      <span id="talkMain">HABLAR</span>
+
+      <span id="talkSub">
+        Esperando transmisión
+      </span>
+
+    </button>
+
+    <div id="status">
+      🟢 CONECTADO
+    </div>
 
     <h3>Usuarios conectados</h3>
+
     <div id="usersBox"></div>
 
-    <p class="small">Mantén presionado HABLAR y suelta para dejar de transmitir.</p>
   </div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
 <script>
+
 let socket;
 let peer;
 let localStream;
+
 let room="";
 let myName="";
 let myPeerId="";
 let myDeviceId="";
+
 let calls={};
 let users={};
 
-const loginBox=document.getElementById("loginBox");
-const radioBox=document.getElementById("radioBox");
-const nameInput=document.getElementById("nameInput");
-const roomInput=document.getElementById("roomInput");
-const roomLabel=document.getElementById("roomLabel");
-const nameLabel=document.getElementById("nameLabel");
-const myIdLabel=document.getElementById("myIdLabel");
-const deviceIdLabel=document.getElementById("deviceIdLabel");
-const statusBox=document.getElementById("status");
-const usersBox=document.getElementById("usersBox");
-const talkBtn=document.getElementById("talkBtn");
+const loginBox=
+document.getElementById("loginBox");
 
-function setStatus(text){
-  statusBox.innerText=text;
-}
+const radioBox=
+document.getElementById("radioBox");
+
+const nameInput=
+document.getElementById("nameInput");
+
+const roomInput=
+document.getElementById("roomInput");
+
+const roomLabel=
+document.getElementById("roomLabel");
+
+const nameLabel=
+document.getElementById("nameLabel");
+
+const myIdLabel=
+document.getElementById("myIdLabel");
+
+const deviceIdLabel=
+document.getElementById("deviceIdLabel");
+
+const usersBox=
+document.getElementById("usersBox");
+
+const talkBtn=
+document.getElementById("talkBtn");
+
+const talkMain=
+document.getElementById("talkMain");
+
+const talkSub=
+document.getElementById("talkSub");
 
 function radioBeep(type){
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  const duration = type === "start" ? 0.32 : 0.42;
-  const bufferSize = audioCtx.sampleRate * duration;
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
+  const audioCtx =
+  new (
+    window.AudioContext ||
+    window.webkitAudioContext
+  )();
 
-  for(let i = 0; i < bufferSize; i++){
-    data[i] = (Math.random() * 2 - 1) * 0.9;
+  const duration =
+  type==="start"
+  ?0.32
+  :0.42;
+
+  const bufferSize =
+  audioCtx.sampleRate *
+  duration;
+
+  const buffer =
+  audioCtx.createBuffer(
+    1,
+    bufferSize,
+    audioCtx.sampleRate
+  );
+
+  const data =
+  buffer.getChannelData(0);
+
+  for(
+    let i=0;
+    i<bufferSize;
+    i++
+  ){
+
+    data[i] =
+    (
+      Math.random()*2-1
+    )*0.9;
+
   }
 
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = buffer;
+  const noise =
+  audioCtx.createBufferSource();
 
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.frequency.value = type === "start" ? 1800 : 1200;
-  filter.Q.value = 1.8;
+  noise.buffer=buffer;
 
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(type === "start" ? 0.75 : 0.85, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+  const filter =
+  audioCtx.createBiquadFilter();
+
+  filter.type="bandpass";
+
+  filter.frequency.value=
+  type==="start"
+  ?1800
+  :1200;
+
+  const gain =
+  audioCtx.createGain();
+
+  gain.gain.setValueAtTime(
+    0.9,
+    audioCtx.currentTime
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.01,
+    audioCtx.currentTime +
+    duration
+  );
 
   noise.connect(filter);
+
   filter.connect(gain);
-  gain.connect(audioCtx.destination);
+
+  gain.connect(
+    audioCtx.destination
+  );
 
   noise.start();
-  noise.stop(audioCtx.currentTime + duration);
 
-  const osc = audioCtx.createOscillator();
-  const beepGain = audioCtx.createGain();
+  noise.stop(
+    audioCtx.currentTime +
+    duration
+  );
 
-  osc.type = "square";
-  osc.frequency.value = type === "start" ? 980 : 520;
-
-  beepGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-  beepGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-
-  osc.connect(beepGain);
-  beepGain.connect(audioCtx.destination);
-
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.12);
 }
 
 function getFixedDeviceId(){
-  let id=localStorage.getItem("walkie_device_id");
+
+  let id =
+  localStorage.getItem(
+    "walkie_device_id"
+  );
 
   if(!id){
-    if(window.crypto && crypto.randomUUID){
-      id="device-"+crypto.randomUUID();
-    }else{
-      id="device-"+Date.now()+"-"+Math.random().toString(36).substring(2,12);
-    }
-    localStorage.setItem("walkie_device_id",id);
+
+    id =
+    "device-" +
+    crypto.randomUUID();
+
+    localStorage.setItem(
+      "walkie_device_id",
+      id
+    );
+
   }
 
   return id;
+
 }
 
 function getFixedPeerId(){
-  let id=localStorage.getItem("walkie_peer_id");
+
+  let id =
+  localStorage.getItem(
+    "walkie_peer_id"
+  );
 
   if(!id){
-    id="radio-"+getFixedDeviceId()
-      .replace("device-","")
-      .replace(/-/g,"")
-      .substring(0,14);
 
-    localStorage.setItem("walkie_peer_id",id);
+    id =
+    "radio-" +
+    getFixedDeviceId()
+    .replace(
+      "device-",
+      ""
+    )
+    .replace(
+      /-/g,
+      ""
+    )
+    .substring(
+      0,
+      14
+    );
+
+    localStorage.setItem(
+      "walkie_peer_id",
+      id
+    );
+
   }
 
   return id;
+
 }
 
 function loadSavedData(){
-  const savedName=localStorage.getItem("walkie_name");
-  const savedRoom=localStorage.getItem("walkie_room");
 
-  if(savedName) nameInput.value=savedName;
-  if(savedRoom) roomInput.value=savedRoom;
+  const savedName =
+  localStorage.getItem(
+    "walkie_name"
+  );
+
+  const savedRoom =
+  localStorage.getItem(
+    "walkie_room"
+  );
+
+  if(savedName)
+  nameInput.value =
+  savedName;
+
+  if(savedRoom)
+  roomInput.value =
+  savedRoom;
+
 }
 
 function saveUserData(){
-  localStorage.setItem("walkie_name",myName);
-  localStorage.setItem("walkie_room",room);
+
+  localStorage.setItem(
+    "walkie_name",
+    myName
+  );
+
+  localStorage.setItem(
+    "walkie_room",
+    room
+  );
+
 }
 
 async function prepareMic(){
-  localStream=await navigator.mediaDevices.getUserMedia({
-    audio:{
-      echoCancellation:true,
-      noiseSuppression:true,
-      autoGainControl:true
-    },
-    video:false
+
+  localStream =
+  await navigator
+  .mediaDevices
+  .getUserMedia({
+
+    audio:true
+
   });
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=false;
-  });
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
+
+      track.enabled=false;
+
+    }
+  );
+
 }
 
-function createAudio(peerId,stream){
-  let audio=document.getElementById("audio-"+peerId);
+function createAudio(
+  peerId,
+  stream
+){
+
+  let audio =
+  document.getElementById(
+    "audio-"+peerId
+  );
 
   if(!audio){
-    audio=document.createElement("audio");
-    audio.id="audio-"+peerId;
+
+    audio =
+    document.createElement(
+      "audio"
+    );
+
+    audio.id =
+    "audio-"+peerId;
+
     audio.autoplay=true;
+
     audio.playsInline=true;
-    document.body.appendChild(audio);
+
+    document.body.appendChild(
+      audio
+    );
+
   }
 
   audio.srcObject=stream;
+
   audio.volume=1;
-  audio.muted=false;
 
-  audio.play().catch(()=>{
-    setStatus("Toca HABLAR una vez para activar audio.");
-  });
+  audio.play();
+
 }
 
-function addUser(peerId,name,deviceId){
-  if(peerId===myPeerId) return;
+function addUser(
+  peerId,
+  name,
+  deviceId
+){
 
-  users[peerId]={name,deviceId};
+  if(
+    peerId===myPeerId
+  ) return;
+
+  users[
+    peerId
+  ] = {
+
+    name,
+    deviceId
+
+  };
+
   renderUsers();
+
 }
 
-function removeUser(peerId){
-  delete users[peerId];
+function removeUser(
+  peerId
+){
 
-  if(calls[peerId]){
-    calls[peerId].close();
-    delete calls[peerId];
-  }
-
-  const audio=document.getElementById("audio-"+peerId);
-  if(audio) audio.remove();
+  delete users[
+    peerId
+  ];
 
   renderUsers();
+
 }
 
 function renderUsers(){
-  usersBox.innerHTML="";
-  const ids=Object.keys(users);
 
-  if(ids.length===0){
-    usersBox.innerHTML="<p class='small'>Sin usuarios conectados.</p>";
+  usersBox.innerHTML="";
+
+  const ids =
+  Object.keys(users);
+
+  if(
+    ids.length===0
+  ){
+
+    usersBox.innerHTML=
+    "<p class='small'>Sin usuarios.</p>";
+
     return;
+
   }
 
   ids.forEach(id=>{
-    const div=document.createElement("div");
-    div.className="user";
-    div.innerHTML=`
-      <b>${users[id].name}</b><br>
-      <span class="small">${users[id].deviceId}</span>
+
+    const div =
+    document.createElement(
+      "div"
+    );
+
+    div.className=
+    "user";
+
+    div.innerHTML=
+    `
+    <b>${users[id].name}</b><br>
+    <span class="small">
+    ${users[id].deviceId}
+    </span>
     `;
-    usersBox.appendChild(div);
+
+    usersBox.appendChild(
+      div
+    );
+
   });
+
 }
 
-function callUser(peerId){
-  if(calls[peerId]) return;
+function callUser(
+  peerId
+){
 
-  const call=peer.call(peerId,localStream);
+  if(
+    calls[peerId]
+  ) return;
 
-  call.on("stream",remoteStream=>{
-    createAudio(peerId,remoteStream);
-    setStatus("Conectado. Esperando transmisión.");
-  });
+  const call =
+  peer.call(
+    peerId,
+    localStream
+  );
 
-  call.on("close",()=>{
-    removeUser(peerId);
-  });
+  call.on(
+    "stream",
+    remoteStream=>{
 
-  calls[peerId]=call;
+      createAudio(
+        peerId,
+        remoteStream
+      );
+
+    }
+  );
+
+  calls[
+    peerId
+  ] = call;
+
 }
 
 async function joinRoom(){
-  myName=nameInput.value.trim();
-  room=roomInput.value.trim();
 
-  if(!myName || !room){
-    alert("Completa tu nombre y sala.");
+  myName =
+  nameInput.value.trim();
+
+  room =
+  roomInput.value.trim();
+
+  if(
+    !myName ||
+    !room
+  ){
+
+    alert(
+      "Completa los datos"
+    );
+
     return;
+
   }
 
   saveUserData();
 
-  try{
-    await prepareMic();
-  }catch{
-    alert("Debes permitir el micrófono.");
-    return;
-  }
+  await prepareMic();
 
-  loginBox.style.display="none";
-  radioBox.style.display="block";
+  loginBox.style.display=
+  "none";
 
-  myDeviceId=getFixedDeviceId();
+  radioBox.style.display=
+  "block";
 
-  roomLabel.innerText=room;
-  nameLabel.innerText=myName;
-  deviceIdLabel.innerText=myDeviceId;
+  myDeviceId =
+  getFixedDeviceId();
+
+  roomLabel.innerText=
+  room;
+
+  nameLabel.innerText=
+  myName;
+
+  deviceIdLabel.innerText=
+  myDeviceId;
 
   socket=io();
-  myPeerId=getFixedPeerId();
 
-  peer=new Peer(myPeerId,{
-    host:location.hostname,
-    port:location.port || (location.protocol==="https:" ? 443 : 80),
-    path:"/peerjs",
-    secure:location.protocol==="https:",
-    config:{
-      iceServers:[
-        {urls:"stun:stun.l.google.com:19302"},
-        {urls:"stun:stun1.l.google.com:19302"},
-        {urls:"stun:stun2.l.google.com:19302"}
-      ]
+  myPeerId=
+  getFixedPeerId();
+
+  peer=
+  new Peer(
+    myPeerId,
+    {
+
+      host:
+      location.hostname,
+
+      port:
+      location.port ||
+      (
+        location.protocol==="https:"
+        ?443
+        :80
+      ),
+
+      path:
+      "/peerjs",
+
+      secure:
+      location.protocol==="https:"
+
     }
-  });
+  );
 
-  peer.on("open",id=>{
-    myPeerId=id;
-    myIdLabel.innerText=id;
+  peer.on(
+    "open",
+    id=>{
 
-    socket.emit("join-room",{
-      room,
-      peerId:id,
-      name:myName,
-      deviceId:myDeviceId
-    });
+      myIdLabel.innerText=id;
 
-    setStatus("Conectado. Esperando transmisión.");
-  });
+      socket.emit(
+        "join-room",
+        {
 
-  peer.on("call",call=>{
-    call.answer(localStream);
+          room,
 
-    call.on("stream",remoteStream=>{
-      createAudio(call.peer,remoteStream);
-      setStatus("Conectado. Esperando transmisión.");
-    });
+          peerId:id,
 
-    calls[call.peer]=call;
-  });
+          name:myName,
 
-  peer.on("error",error=>{
-    if(error.type==="unavailable-id"){
-      localStorage.removeItem("walkie_peer_id");
-      alert("Tu ID estaba repetido o abierto en otra pestaña. Cierra otras pestañas y recarga.");
-    }else{
-      setStatus("Error: "+error.type);
+          deviceId:
+          myDeviceId
+
+        }
+      );
+
     }
-  });
+  );
 
-  socket.on("users-in-room",existingUsers=>{
-    existingUsers.forEach(user=>{
-      addUser(user.peerId,user.name,user.deviceId);
-      callUser(user.peerId);
-    });
-  });
+  peer.on(
+    "call",
+    call=>{
 
-  socket.on("user-joined",user=>{
-    addUser(user.peerId,user.name,user.deviceId);
-  });
+      call.answer(
+        localStream
+      );
 
-  socket.on("user-left",peerId=>{
-    removeUser(peerId);
-  });
+      call.on(
+        "stream",
+        remoteStream=>{
+
+          createAudio(
+            call.peer,
+            remoteStream
+          );
+
+        }
+      );
+
+      calls[
+        call.peer
+      ] = call;
+
+    }
+  );
+
+  socket.on(
+    "users-in-room",
+    existingUsers=>{
+
+      existingUsers
+      .forEach(
+        user=>{
+
+          addUser(
+            user.peerId,
+            user.name,
+            user.deviceId
+          );
+
+          callUser(
+            user.peerId
+          );
+
+        }
+      );
+
+    }
+  );
+
+  socket.on(
+    "user-joined",
+    user=>{
+
+      addUser(
+        user.peerId,
+        user.name,
+        user.deviceId
+      );
+
+    }
+  );
+
+  socket.on(
+    "user-left",
+    peerId=>{
+
+      removeUser(
+        peerId
+      );
+
+    }
+  );
+
 }
 
 function startTalking(){
-  if(!localStream){
-    setStatus("Micrófono no listo.");
-    return;
-  }
 
-  radioBeep("start");
+  if(
+    !localStream
+  ) return;
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=true;
-  });
+  radioBeep(
+    "start"
+  );
 
-  setStatus("Transmitiendo...");
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
+
+      track.enabled=true;
+
+    }
+  );
+
+  talkMain.innerText=
+  "TRANSMITIENDO";
+
+  talkSub.style.display=
+  "none";
+
 }
 
 function stopTalking(){
-  if(!localStream) return;
 
-  radioBeep("stop");
+  if(
+    !localStream
+  ) return;
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled=false;
-  });
+  radioBeep(
+    "stop"
+  );
 
-  setStatus("Conectado. Esperando transmisión.");
+  localStream
+  .getAudioTracks()
+  .forEach(
+    track=>{
+
+      track.enabled=false;
+
+    }
+  );
+
+  talkMain.innerText=
+  "HABLAR";
+
+  talkSub.style.display=
+  "block";
+
 }
 
-talkBtn.addEventListener("touchstart",e=>{
-  e.preventDefault();
-  startTalking();
-});
+talkBtn
+.addEventListener(
+  "touchstart",
+  e=>{
 
-talkBtn.addEventListener("touchend",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    e.preventDefault();
 
-talkBtn.addEventListener("touchcancel",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    startTalking();
 
-talkBtn.addEventListener("mousedown",e=>{
-  e.preventDefault();
-  startTalking();
-});
+  }
+);
 
-talkBtn.addEventListener("mouseup",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+talkBtn
+.addEventListener(
+  "touchend",
+  e=>{
 
-talkBtn.addEventListener("mouseleave",e=>{
-  e.preventDefault();
-  stopTalking();
-});
+    e.preventDefault();
+
+    stopTalking();
+
+  }
+);
+
+talkBtn
+.addEventListener(
+  "mousedown",
+  e=>{
+
+    e.preventDefault();
+
+    startTalking();
+
+  }
+);
+
+talkBtn
+.addEventListener(
+  "mouseup",
+  e=>{
+
+    e.preventDefault();
+
+    stopTalking();
+
+  }
+);
 
 loadSavedData();
+
 </script>
 
 </body>
