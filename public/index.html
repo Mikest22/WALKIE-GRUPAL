@@ -6,22 +6,42 @@
 <title>Walkie Grupal</title>
 
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
   margin:0;
-  font-family:Arial,sans-serif;
+  padding:0;
+  width:100%;
+  min-height:100%;
   background:#061527;
   color:white;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
   padding:15px;
 }
+
 .card{
+  width:100%;
   max-width:430px;
-  margin:auto;
   background:#183b64;
-  border-radius:25px;
+  border-radius:26px;
   padding:20px;
   text-align:center;
 }
+
+h1{
+  font-size:34px;
+  margin:10px 0 20px;
+}
+
 input,button{
   width:100%;
   padding:16px;
@@ -30,35 +50,45 @@ input,button{
   border-radius:16px;
   font-size:18px;
 }
+
 button{
   color:white;
   font-weight:bold;
   background:#2ecc71;
 }
+
 #talkBtn{
-  width:240px;
-  height:240px;
+  width:250px;
+  height:250px;
   border-radius:50%;
   background:#ef3340;
-  font-size:38px;
+  font-size:42px;
   box-shadow:0 12px 0 #8d1520;
-  margin:20px auto;
+  margin:25px auto;
   display:block;
 }
+
 #talkBtn:active{
   transform:translateY(8px);
   box-shadow:0 3px 0 #8d1520;
 }
+
 #status{
   color:#ffd166;
-  font-size:22px;
-  margin:12px 0;
+  font-size:24px;
+  margin:15px 0;
 }
+
 .user{
   background:#0d2746;
   padding:10px;
-  border-radius:10px;
-  margin:6px 0;
+  border-radius:12px;
+  margin:8px 0;
+}
+
+.small{
+  color:#dfe6e9;
+  font-size:15px;
 }
 </style>
 </head>
@@ -68,26 +98,27 @@ button{
 <div class="card">
   <h1>📻 Walkie Grupal</h1>
 
-  <div id="login">
+  <div id="loginBox">
     <input id="nameInput" placeholder="Tu nombre">
-    <input id="roomInput" placeholder="Nombre de sala" value="radio-mike">
+    <input id="roomInput" value="radio-mike" placeholder="Nombre de sala">
     <button onclick="joinRoom()">ENTRAR A LA SALA</button>
+    <p class="small">Funciona con WiFi y datos móviles si Render está en HTTPS.</p>
   </div>
 
-  <div id="app" style="display:none;">
-    <p><b>Sala:</b> <span id="roomName"></span></p>
-    <p><b>Tu ID:</b> <span id="myPeerId">...</span></p>
+  <div id="radioBox" style="display:none;">
+    <p><b>Sala:</b> <span id="roomLabel"></span></p>
+    <p><b>Tu ID:</b> <span id="myIdLabel">...</span></p>
 
     <button id="talkBtn">HABLAR</button>
 
     <div id="status">Conectando...</div>
 
     <h3>Usuarios conectados</h3>
-    <div id="users"></div>
+    <div id="usersBox"></div>
+
+    <p class="small">Mantén presionado HABLAR y suelta para dejar de transmitir.</p>
   </div>
 </div>
-
-<audio id="remoteAudio" autoplay playsinline></audio>
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
@@ -95,29 +126,39 @@ button{
 <script>
 let socket;
 let peer;
-let localStream = null;
-let myPeerId = "";
+let localStream;
 let room = "";
-let userName = "";
-
-let peers = {};
+let myName = "";
+let myPeerId = "";
 let calls = {};
+let users = {};
 
-const login = document.getElementById("login");
-const app = document.getElementById("app");
-const statusDiv = document.getElementById("status");
+const loginBox = document.getElementById("loginBox");
+const radioBox = document.getElementById("radioBox");
+const nameInput = document.getElementById("nameInput");
+const roomInput = document.getElementById("roomInput");
+const roomLabel = document.getElementById("roomLabel");
+const myIdLabel = document.getElementById("myIdLabel");
+const statusBox = document.getElementById("status");
+const usersBox = document.getElementById("usersBox");
 const talkBtn = document.getElementById("talkBtn");
-const usersDiv = document.getElementById("users");
-const roomName = document.getElementById("roomName");
-const myPeerIdSpan = document.getElementById("myPeerId");
 
 function setStatus(text){
-  statusDiv.innerText = text;
+  statusBox.innerText = text;
+}
+
+function getFixedPeerId(){
+  let id = localStorage.getItem("walkie_grupal_peer_id");
+
+  if(!id){
+    id = "radio-" + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem("walkie_grupal_peer_id", id);
+  }
+
+  return id;
 }
 
 async function prepareMic(){
-  if(localStream) return localStream;
-
   localStream = await navigator.mediaDevices.getUserMedia({
     audio:{
       echoCancellation:true,
@@ -130,42 +171,9 @@ async function prepareMic(){
   localStream.getAudioTracks().forEach(track=>{
     track.enabled = false;
   });
-
-  return localStream;
 }
 
-function getFixedId(){
-  let id = localStorage.getItem("walkie_grupal_id");
-
-  if(!id){
-    id = "radio-" + Math.random().toString(36).substring(2,10);
-    localStorage.setItem("walkie_grupal_id", id);
-  }
-
-  return id;
-}
-
-function addUser(peerId, name){
-  if(document.getElementById("user-" + peerId)) return;
-
-  const div = document.createElement("div");
-  div.className = "user";
-  div.id = "user-" + peerId;
-  div.innerText = name + " conectado";
-  usersDiv.appendChild(div);
-}
-
-function removeUser(peerId){
-  const el = document.getElementById("user-" + peerId);
-  if(el) el.remove();
-
-  if(calls[peerId]){
-    calls[peerId].close();
-    delete calls[peerId];
-  }
-}
-
-function playRemoteStream(remoteStream, peerId){
+function createAudio(peerId, stream){
   let audio = document.getElementById("audio-" + peerId);
 
   if(!audio){
@@ -176,72 +184,162 @@ function playRemoteStream(remoteStream, peerId){
     document.body.appendChild(audio);
   }
 
-  audio.srcObject = remoteStream;
+  audio.srcObject = stream;
   audio.volume = 1;
   audio.muted = false;
 
   audio.play().catch(()=>{
-    setStatus("Toca HABLAR para activar el audio.");
+    setStatus("Toca HABLAR una vez para activar audio.");
   });
 }
 
-async function joinRoom(){
-  userName = document.getElementById("nameInput").value.trim();
-  room = document.getElementById("roomInput").value.trim();
+function addUser(peerId, name){
+  if(peerId === myPeerId) return;
 
-  if(!userName || !room){
-    alert("Escribe tu nombre y sala");
+  users[peerId] = name;
+  renderUsers();
+}
+
+function removeUser(peerId){
+  delete users[peerId];
+
+  if(calls[peerId]){
+    calls[peerId].close();
+    delete calls[peerId];
+  }
+
+  const audio = document.getElementById("audio-" + peerId);
+  if(audio) audio.remove();
+
+  renderUsers();
+}
+
+function renderUsers(){
+  usersBox.innerHTML = "";
+
+  const ids = Object.keys(users);
+
+  if(ids.length === 0){
+    usersBox.innerHTML = "<p class='small'>No hay otros usuarios todavía.</p>";
+    return;
+  }
+
+  ids.forEach(id=>{
+    const div = document.createElement("div");
+    div.className = "user";
+    div.innerText = users[id];
+    usersBox.appendChild(div);
+  });
+}
+
+function callUser(peerId){
+  if(calls[peerId]) return;
+
+  const call = peer.call(peerId, localStream);
+
+  call.on("stream", remoteStream=>{
+    createAudio(peerId, remoteStream);
+    setStatus("Conectado. Esperando transmisión.");
+  });
+
+  call.on("close", ()=>{
+    removeUser(peerId);
+  });
+
+  calls[peerId] = call;
+}
+
+async function joinRoom(){
+  myName = nameInput.value.trim();
+  room = roomInput.value.trim();
+
+  if(!myName || !room){
+    alert("Escribe tu nombre y la sala.");
     return;
   }
 
   try{
     await prepareMic();
   }catch{
-    alert("Debes permitir el micrófono");
+    alert("Debes permitir el micrófono.");
     return;
   }
 
-  login.style.display = "none";
-  app.style.display = "block";
-  roomName.innerText = room;
+  loginBox.style.display = "none";
+  radioBox.style.display = "block";
+
+  roomLabel.innerText = room;
 
   socket = io();
 
-  myPeerId = getFixedId();
+  myPeerId = getFixedPeerId();
 
   peer = new Peer(myPeerId, {
-  host: location.hostname,
-  port: location.port || (location.protocol === "https:" ? 443 : 80),
-  path: "/peerjs",
-  secure: location.protocol === "https:",
-  config: {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" }
-    ]
-  }
-});
+    host: location.hostname,
+    port: location.port || (location.protocol === "https:" ? 443 : 80),
+    path: "/peerjs",
+    secure: location.protocol === "https:",
+    config:{
+      iceServers:[
+        { urls:"stun:stun.l.google.com:19302" },
+        { urls:"stun:stun1.l.google.com:19302" },
+        { urls:"stun:stun2.l.google.com:19302" }
+      ]
+    }
+  });
 
-  socket.on("user-connected", data=>{
-    addUser(data.peerId, data.name);
+  peer.on("open", id=>{
+    myPeerId = id;
+    myIdLabel.innerText = id;
 
-socket.on("existing-users", users => {
-  users.forEach(user => {
-    addUser(user.peerId, user.name);
-
-    const call = peer.call(user.peerId, localStream);
-
-    call.on("stream", remoteStream => {
-      playRemoteStream(remoteStream, user.peerId);
+    socket.emit("join-room", {
+      room,
+      peerId:id,
+      name:myName
     });
 
-    calls[user.peerId] = call;
+    setStatus("Conectado. Esperando transmisión.");
   });
-});
+
+  peer.on("call", call=>{
+    call.answer(localStream);
+
+    call.on("stream", remoteStream=>{
+      createAudio(call.peer, remoteStream);
+      setStatus("Conectado. Esperando transmisión.");
+    });
+
+    calls[call.peer] = call;
+  });
+
+  peer.on("error", error=>{
+    if(error.type === "unavailable-id"){
+      localStorage.removeItem("walkie_grupal_peer_id");
+      alert("Tu ID estaba repetido. Recarga la página.");
+    }else{
+      setStatus("Error: " + error.type);
+    }
+  });
+
+  socket.on("users-in-room", existingUsers=>{
+    existingUsers.forEach(user=>{
+      addUser(user.peerId, user.name);
+      callUser(user.peerId);
+    });
+  });
+
+  socket.on("user-joined", user=>{
+    addUser(user.peerId, user.name);
+  });
+
+  socket.on("user-left", peerId=>{
+    removeUser(peerId);
+  });
+}
 
 function startTalking(){
   if(!localStream){
-    setStatus("Micrófono no disponible.");
+    setStatus("Micrófono no listo.");
     return;
   }
 
