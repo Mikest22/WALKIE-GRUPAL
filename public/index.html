@@ -78,8 +78,6 @@ button{color:white;font-weight:bold;background:#2ecc71;}
       <h3>Usuarios conectados</h3>
       <div id="usersBox"></div>
     </div>
-
-    <p class="small">Mantén presionado HABLAR y suelta para dejar de transmitir.</p>
   </div>
 </div>
 
@@ -107,17 +105,22 @@ const floatingSpeaker=document.getElementById("floatingSpeaker");
 
 const motorolaStart=new Audio("./assets/motorola-start.mp3");
 const motorolaEnd=new Audio("./assets/motorola-end.mp3");
+
 motorolaStart.volume=1;
 motorolaEnd.volume=1;
 motorolaStart.preload="auto";
 motorolaEnd.preload="auto";
 
+motorolaStart.load();
+motorolaEnd.load();
+
 function playSound(type){
-  const base=type==="start"?motorolaStart:motorolaEnd;
+  const sound = type === "start" ? motorolaStart : motorolaEnd;
+
   try{
-    const sound=base.cloneNode();
-    sound.volume=1;
-    sound.currentTime=0;
+    sound.pause();
+    sound.currentTime = 0;
+    sound.volume = 1;
     sound.play().catch(()=>radioBeep(type));
   }catch{
     radioBeep(type);
@@ -278,15 +281,11 @@ async function joinRoom(){
   try{
     await prepareMic();
 
-    try{
-      await motorolaStart.play();
-      motorolaStart.pause();
-      motorolaStart.currentTime=0;
-    }catch{}
+    motorolaStart.load();
+    motorolaEnd.load();
 
     try{
-      await motorolaEnd.play();
-      motorolaEnd.pause();
+      motorolaStart.currentTime=0;
       motorolaEnd.currentTime=0;
     }catch{}
 
