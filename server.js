@@ -27,6 +27,9 @@ io.on("connection", socket => {
     const { room, peerId, name, deviceId } = data;
 
     socket.join(room);
+    socket.data.room = room;
+    socket.data.peerId = peerId;
+    socket.data.name = name;
 
     if (!rooms[room]) rooms[room] = [];
 
@@ -44,14 +47,29 @@ io.on("connection", socket => {
       name,
       deviceId
     });
+  });
 
-    socket.on("disconnect", () => {
-      if (!rooms[room]) return;
-
-      rooms[room] = rooms[room].filter(u => u.socketId !== socket.id);
-
-      socket.to(room).emit("user-left", peerId);
+  socket.on("talking-start", data => {
+    socket.to(data.room).emit("user-talking", {
+      name: data.name
     });
+  });
+
+  socket.on("talking-stop", data => {
+    socket.to(data.room).emit("user-stopped-talking", {
+      name: data.name
+    });
+  });
+
+  socket.on("disconnect", () => {
+    const room = socket.data.room;
+    const peerId = socket.data.peerId;
+
+    if (!room || !rooms[room]) return;
+
+    rooms[room] = rooms[room].filter(u => u.socketId !== socket.id);
+
+    socket.to(room).emit("user-left", peerId);
   });
 });
 
