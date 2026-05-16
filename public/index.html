@@ -11,6 +11,8 @@
   padding:0;
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 html,body{
@@ -64,14 +66,6 @@ h1{
   color:white !important;
 }
 
-.panel b{
-  color:#ffffff !important;
-}
-
-.panel span{
-  color:#f2ffff !important;
-}
-
 input,button{
   width:100%;
   border:none;
@@ -86,6 +80,8 @@ input{
   color:white;
   text-align:center;
   border:1px solid rgba(255,255,255,.2);
+  user-select:text;
+  -webkit-user-select:text;
 }
 
 button{
@@ -125,6 +121,10 @@ button{
   align-items:center;
   box-shadow:0 0 25px rgba(255,120,50,.8), inset 0 0 20px rgba(255,255,255,.08);
   touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+  -webkit-user-drag:none;
 }
 
 .transmitting{
@@ -144,12 +144,18 @@ button{
   font-size:28px;
   font-weight:bold;
   color:white;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 #talkSub{
   font-size:11px;
   margin-top:5px;
   color:#ffd7bf;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
 }
 
 #status{
@@ -261,6 +267,9 @@ let isTalking = false;
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
 const talkSub = document.getElementById("talkSub");
+
+talkBtn.addEventListener("selectstart", e => e.preventDefault());
+talkBtn.addEventListener("contextmenu", e => e.preventDefault());
 
 function instantBeep(type){
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
