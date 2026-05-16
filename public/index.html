@@ -20,8 +20,8 @@ html,body{
   height:100dvh;
   overflow:hidden;
   font-family:Arial,sans-serif;
-  color:white;
   background:#020812;
+  color:white;
 }
 
 body{
@@ -29,80 +29,101 @@ body{
   justify-content:center;
   align-items:center;
   background:
-    radial-gradient(circle at top,#06324a 0%,transparent 35%),
-    radial-gradient(circle at bottom,#001f1e 0%,#020812 70%);
+    radial-gradient(circle at top,#063a55 0%,transparent 35%),
+    radial-gradient(circle at bottom,#001f1e 0%,#020812 75%);
 }
 
 .card{
   width:100vw;
   height:100dvh;
   max-width:430px;
-  padding:calc(12px + env(safe-area-inset-top)) 18px calc(12px + env(safe-area-inset-bottom));
+  padding:calc(8px + env(safe-area-inset-top)) 18px calc(8px + env(safe-area-inset-bottom));
   overflow:hidden;
   display:flex;
   flex-direction:column;
   justify-content:space-evenly;
   background:
+    radial-gradient(circle at 50% 45%,rgba(0,190,255,.11),transparent 32%),
     linear-gradient(180deg,rgba(2,25,38,.98),rgba(0,15,22,.98));
-  position:relative;
-}
-
-.card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    radial-gradient(circle at 50% 42%,rgba(0,200,255,.13),transparent 32%),
-    linear-gradient(90deg,rgba(0,255,255,.05),transparent,rgba(0,255,255,.05));
-  pointer-events:none;
 }
 
 h1{
-  position:relative;
   text-align:center;
-  font-size:48px;
+  font-size:46px;
   line-height:1;
   font-family:Impact,Arial Black,sans-serif;
-  color:#ffe1b5;
+  color:#ffe0ad;
   text-shadow:
-    0 0 14px rgba(255,180,80,.85),
-    4px 4px 0 rgba(20,10,40,.9);
-  margin-bottom:8px;
+    0 0 16px rgba(255,185,90,.9),
+    4px 4px 0 rgba(18,9,35,.95);
 }
 
 .panel{
-  position:relative;
-  border:1px solid rgba(0,220,255,.45);
+  border:1px solid rgba(0,220,255,.48);
   border-radius:18px;
-  background:rgba(0,25,35,.68);
+  background:rgba(0,25,35,.72);
   box-shadow:
     inset 0 0 20px rgba(0,210,255,.08),
     0 0 12px rgba(0,200,255,.08);
-  padding:13px 16px;
+  padding:12px;
   margin:5px 0;
-  color:white;
 }
 
-.panel:nth-of-type(1){
+.infoGrid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
+  gap:10px;
+}
+
+.infoItem,
+.fullItem{
+  display:flex;
+  align-items:center;
+  gap:13px;
   text-align:left;
 }
 
-.panel:nth-of-type(1) p{
-  font-size:15px;
-  color:#42dcff !important;
+.iconBox{
+  min-width:54px;
+  width:54px;
+  height:54px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  background:rgba(0,180,255,.12);
+  border:1px solid rgba(0,220,255,.22);
+  box-shadow:inset 0 0 18px rgba(0,220,255,.08);
 }
 
-.panel:nth-of-type(1) b{
-  display:block;
-  color:#42dcff !important;
+.iconBlue{color:#39dfff;}
+.iconPurple{color:#7d73ff;}
+.iconYellow{color:#ffc247;}
+.iconGreen{color:#00ff88;}
+
+.label{
+  color:#42dcff;
+  font-weight:bold;
+  font-size:15px;
   margin-bottom:5px;
 }
 
-.panel *{
-  color:white !important;
+.value{
+  color:#fff;
+  font-weight:bold;
+  font-size:21px;
+}
+
+.idValue{
+  color:#e6fbff;
+  font-size:16px;
+  word-break:break-word;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:8px 10px;
+  margin-top:5px;
 }
 
 input,button{
@@ -129,34 +150,24 @@ button{
   font-weight:bold;
 }
 
-.idText{
-  background:rgba(255,255,255,.1);
-  border:1px solid rgba(0,220,255,.25);
-  border-radius:12px;
-  padding:10px;
-  font-size:14px;
-  word-break:break-word;
-  color:#e6fbff !important;
-}
-
 .wave{
-  height:42px;
-  margin:2px 0;
-  opacity:.8;
+  height:40px;
+  margin:0;
+  opacity:.85;
   background:
     repeating-linear-gradient(
       90deg,
       transparent 0 14px,
-      rgba(0,255,220,.75) 14px 18px,
+      rgba(0,255,220,.8) 14px 18px,
       transparent 18px 28px
     );
   filter:drop-shadow(0 0 8px rgba(0,255,220,.35));
 }
 
 #talkBtn{
-  width:190px;
-  height:190px;
-  margin:6px auto;
+  width:180px;
+  height:180px;
+  margin:4px auto;
   border-radius:50%;
   border:4px solid #ff9a37;
   color:white;
@@ -172,6 +183,7 @@ button{
     inset 0 0 35px rgba(255,255,255,.07);
   touch-action:none;
   position:relative;
+  -webkit-touch-callout:none;
 }
 
 #talkBtn::before{
@@ -179,7 +191,7 @@ button{
   position:absolute;
   inset:-18px;
   border-radius:50%;
-  border:1px solid rgba(0,220,255,.13);
+  border:1px solid rgba(0,220,255,.12);
   box-shadow:0 0 35px rgba(0,200,255,.08);
 }
 
@@ -205,34 +217,40 @@ button{
 
 #talkSub{
   font-size:14px;
-  margin-top:8px;
-  color:#ffd18a !important;
+  margin-top:7px;
+  color:#ffd18a;
   pointer-events:none;
+}
+
+.statusPanel{
+  border-color:rgba(0,255,100,.55);
 }
 
 #status{
   font-size:34px;
-  color:#ffd18a !important;
+  color:#ffd18a;
   font-weight:bold;
   text-shadow:0 0 12px rgba(255,200,100,.35);
 }
 
-#status::first-letter{
-  color:#00ff55;
+.userRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
 .user{
   background:rgba(255,255,255,.08);
-  border:1px solid rgba(0,220,255,.2);
+  border:1px solid rgba(0,220,255,.22);
   border-radius:12px;
-  padding:10px;
+  padding:8px;
   margin-top:6px;
   color:white;
   text-align:left;
 }
 
 #usersBox{
-  max-height:85px;
+  max-height:80px;
   overflow:hidden;
 }
 
@@ -251,37 +269,25 @@ button{
   box-shadow:0 0 24px rgba(0,255,136,.75);
 }
 
-#loginBox{
-  position:relative;
-  z-index:2;
-}
-
 #radioBox{
-  position:relative;
-  z-index:2;
   display:flex;
   flex-direction:column;
   justify-content:space-evenly;
   height:100%;
 }
 
-#radioBox .panel:last-of-type{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  text-align:left;
-}
-
-#radioBox .panel:last-of-type h3{
-  font-size:22px;
-}
-
-@media(max-height:750px){
-  h1{font-size:42px;}
-  #talkBtn{width:165px;height:165px;}
+@media(max-height:760px){
+  h1{font-size:40px;}
+  .panel{padding:9px;margin:4px 0;}
+  .iconBox{width:46px;height:46px;min-width:46px;font-size:24px;}
+  .label{font-size:14px;}
+  .value{font-size:18px;}
+  .idValue{font-size:14px;padding:7px;}
+  .wave{height:28px;}
+  #talkBtn{width:150px;height:150px;}
   #talkMain{font-size:28px;}
-  .panel{padding:10px 13px;}
-  .wave{height:30px;}
+  #talkSub{font-size:12px;}
+  #status{font-size:28px;}
 }
 </style>
 </head>
@@ -292,49 +298,75 @@ button{
 
 <div class="card">
 
-<h1>📻 Walkie Pro</h1>
+  <h1>📻 Walkie Pro</h1>
 
-<div id="loginBox">
-  <div class="panel">
-    <input id="nameInput" placeholder="Tu nombre">
-    <input id="roomInput" placeholder="Sala" value="radio-mike">
-    <button onclick="joinRoom()">ENTRAR</button>
-  </div>
-</div>
-
-<div id="radioBox" style="display:none;">
-
-  <div class="panel">
-    <p><b>Sala:</b> <span id="roomLabel"></span></p>
-    <br>
-    <p><b>Usuario:</b> <span id="nameLabel"></span></p>
+  <div id="loginBox">
+    <div class="panel">
+      <input id="nameInput" placeholder="Tu nombre">
+      <input id="roomInput" placeholder="Sala" value="radio-mike">
+      <button onclick="joinRoom()">ENTRAR</button>
+    </div>
   </div>
 
-  <div class="panel">
-    <p><b>ID dispositivo:</b></p>
-    <br>
-    <div class="idText" id="deviceIdLabel"></div>
-    <br>
-    <p><b>ID Radio:</b> <span id="myIdLabel"></span></p>
+  <div id="radioBox" style="display:none;">
+
+    <div class="panel infoGrid">
+      <div class="infoItem">
+        <div class="iconBox iconBlue">🏢</div>
+        <div>
+          <div class="label">Sala:</div>
+          <div class="value" id="roomLabel"></div>
+        </div>
+      </div>
+
+      <div class="infoItem">
+        <div class="iconBox iconBlue">👤</div>
+        <div>
+          <div class="label">Usuario:</div>
+          <div class="value" id="nameLabel"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox iconPurple">📱</div>
+      <div style="width:100%;">
+        <div class="label">ID dispositivo:</div>
+        <div class="idValue" id="deviceIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox iconYellow">📡</div>
+      <div>
+        <div class="label" style="color:#ffc247;">ID Radio:</div>
+        <div class="value" id="myIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="wave"></div>
+
+    <div id="talkBtn">
+      <span id="talkMain">HABLAR</span>
+      <span id="talkSub">Esperando transmisión</span>
+    </div>
+
+    <div class="panel statusPanel">
+      <div id="status">🟢 CONECTADO</div>
+    </div>
+
+    <div class="panel userRow">
+      <div class="infoItem">
+        <div class="iconBox iconBlue">👥</div>
+        <div>
+          <h3>Usuarios conectados</h3>
+          <div id="usersBox"></div>
+        </div>
+      </div>
+      <div style="font-size:34px;">›</div>
+    </div>
+
   </div>
-
-  <div class="wave"></div>
-
-  <div id="talkBtn">
-    <span id="talkMain">HABLAR</span>
-    <span id="talkSub">Esperando transmisión</span>
-  </div>
-
-  <div class="panel">
-    <div id="status">🟢 CONECTADO</div>
-  </div>
-
-  <div class="panel">
-    <h3>Usuarios conectados</h3>
-    <div id="usersBox"></div>
-  </div>
-
-</div>
 
 </div>
 
@@ -388,7 +420,6 @@ function instantBeep(type){
 
 function playSound(type){
   const sound = type === "start" ? motorolaStart : motorolaEnd;
-
   instantBeep(type);
 
   try{
@@ -457,7 +488,7 @@ async function joinRoom(){
   }catch{}
 
   document.getElementById("loginBox").style.display = "none";
-  document.getElementById("radioBox").style.display = "block";
+  document.getElementById("radioBox").style.display = "flex";
 
   document.getElementById("roomLabel").innerText = room;
   document.getElementById("nameLabel").innerText = myName;
