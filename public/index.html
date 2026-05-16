@@ -100,7 +100,6 @@ h1{
 .iconBlue{color:#39dfff;}
 .iconPurple{color:#7d73ff;}
 .iconYellow{color:#ffc247;}
-.iconGreen{color:#00ff88;}
 
 .label{
   color:#42dcff;
@@ -228,9 +227,11 @@ button{
 
 #status{
   font-size:34px;
-  color:#ffd18a;
+  color:#00ff66 !important;
   font-weight:bold;
-  text-shadow:0 0 12px rgba(255,200,100,.35);
+  text-shadow:
+    0 0 10px rgba(0,255,102,.85),
+    0 0 22px rgba(0,255,102,.45);
 }
 
 .userRow{
@@ -381,6 +382,8 @@ motorolaStart.preload = "auto";
 motorolaEnd.preload = "auto";
 motorolaStart.volume = 1;
 motorolaEnd.volume = 1;
+motorolaStart.load();
+motorolaEnd.load();
 
 let socket;
 let peer;
@@ -392,6 +395,7 @@ let myDeviceId = "";
 let users = {};
 let calls = {};
 let isTalking = false;
+let activePointerId = null;
 
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
@@ -419,10 +423,16 @@ function instantBeep(type){
 }
 
 function playSound(type){
-  const sound = type === "start" ? motorolaStart : motorolaEnd;
   instantBeep(type);
 
+  const src = type === "start"
+    ? "./assets/motorola-start.mp3"
+    : "./assets/motorola-end.mp3";
+
   try{
+    const sound = new Audio(src);
+    sound.preload = "auto";
+    sound.volume = 1;
     sound.currentTime = 0;
     sound.play().catch(()=>{});
   }catch{}
@@ -481,11 +491,6 @@ async function joinRoom(){
   });
 
   localStream.getAudioTracks().forEach(t=>t.enabled=false);
-
-  try{
-    motorolaStart.load();
-    motorolaEnd.load();
-  }catch{}
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("radioBox").style.display = "flex";
@@ -624,9 +629,10 @@ function renderUsers(){
   });
 }
 
-function startTalking(){
+function startTalking(pointerId=null){
   if(isTalking) return;
   isTalking = true;
+  activePointerId = pointerId;
 
   playSound("start");
 
@@ -647,6 +653,7 @@ function startTalking(){
 function stopTalking(){
   if(!isTalking) return;
   isTalking = false;
+  activePointerId = null;
 
   playSound("end");
 
@@ -666,11 +673,21 @@ function stopTalking(){
 
 talkBtn.addEventListener("pointerdown",e=>{
   e.preventDefault();
-  startTalking();
+
+  try{
+    talkBtn.setPointerCapture(e.pointerId);
+  }catch{}
+
+  startTalking(e.pointerId);
 });
 
 talkBtn.addEventListener("pointerup",e=>{
   e.preventDefault();
+
+  try{
+    talkBtn.releasePointerCapture(e.pointerId);
+  }catch{}
+
   stopTalking();
 });
 
@@ -679,8 +696,7 @@ talkBtn.addEventListener("pointercancel",e=>{
   stopTalking();
 });
 
-talkBtn.addEventListener("pointerleave",e=>{
-  e.preventDefault();
+window.addEventListener("pointerup",()=>{
   stopTalking();
 });
 
