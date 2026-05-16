@@ -5,6 +5,7 @@ const { ExpressPeerServer } = require("peer");
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: { origin: "*" }
 });
@@ -23,7 +24,7 @@ const rooms = {};
 
 io.on("connection", socket => {
   socket.on("join-room", data => {
-    const { room, peerId, name } = data;
+    const { room, peerId, name, deviceId } = data;
 
     socket.join(room);
 
@@ -34,12 +35,14 @@ io.on("connection", socket => {
     rooms[room].push({
       socketId: socket.id,
       peerId,
-      name
+      name,
+      deviceId
     });
 
     socket.to(room).emit("user-joined", {
       peerId,
-      name
+      name,
+      deviceId
     });
 
     socket.on("disconnect", () => {
