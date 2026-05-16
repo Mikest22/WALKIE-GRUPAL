@@ -6,7 +6,6 @@
 <title>Walkie Pro</title>
 
 <style>
-
 *{
   margin:0;
   padding:0;
@@ -14,17 +13,16 @@
   -webkit-tap-highlight-color:transparent;
 }
 
-html, body{
+html,body{
   width:100%;
   height:100dvh;
   overflow:hidden;
-
   font-family:Arial,sans-serif;
-
   background:
     radial-gradient(circle at top left,#2d1230,transparent 35%),
     radial-gradient(circle at bottom right,#004d45,transparent 40%),
     #02070c;
+  color:white;
 }
 
 body{
@@ -34,88 +32,60 @@ body{
 }
 
 .card{
-
   width:100vw;
   height:100dvh;
-
   max-width:430px;
-
   overflow:hidden;
-
   display:flex;
   flex-direction:column;
   justify-content:space-evenly;
-
-  padding:
-    calc(10px + env(safe-area-inset-top))
-    12px
-    calc(10px + env(safe-area-inset-bottom))
-    12px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(12,18,27,.96),
-      rgba(5,35,35,.92)
-    );
-
+  padding:calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+  background:linear-gradient(145deg,rgba(12,18,27,.96),rgba(5,35,35,.92));
 }
 
 h1{
-
   font-size:34px;
   text-align:center;
-
   color:#f6d0b5;
-
-  text-shadow:
-    3px 3px 0 #201430,
-    0 0 15px #ffb86c;
-
+  text-shadow:3px 3px 0 #201430,0 0 15px #ffb86c;
 }
 
 .panel{
-
-  border:1px solid rgba(127,255,235,.45);
-
+  border:1px solid rgba(127,255,235,.55);
   border-radius:14px;
-
   padding:10px;
-
   margin:4px 0;
-
   text-align:center;
-
   background:rgba(5,20,24,.72);
-
+  color:white;
 }
 
-input, button{
+.panel *{
+  color:white !important;
+}
 
+.panel b{
+  color:#ffffff !important;
+}
+
+.panel span{
+  color:#f2ffff !important;
+}
+
+input,button{
   width:100%;
-
   border:none;
-
   border-radius:14px;
-
   padding:14px;
-
   font-size:18px;
-
   margin-top:8px;
-
 }
 
 input{
-
   background:rgba(255,255,255,.12);
-
   color:white;
-
   text-align:center;
-
   border:1px solid rgba(255,255,255,.2);
-
 }
 
 button{
@@ -125,100 +95,55 @@ button{
 }
 
 .idText{
-
-  background:rgba(255,255,255,.08);
-
+  background:rgba(255,255,255,.12);
   border-radius:10px;
-
   padding:8px;
-
   font-size:14px;
-
   word-break:break-word;
-
+  color:#d8f8ff !important;
 }
 
 .wave{
-
   height:24px;
-
   margin:2px 0;
-
   opacity:.5;
-
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,.8),
-      transparent
-    );
-
-  mask-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0 8px,
-      black 8px 12px,
-      transparent 12px 20px
-    );
-
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);
+  mask-image:repeating-linear-gradient(90deg,transparent 0 8px,black 8px 12px,transparent 12px 20px);
 }
 
 #talkBtn{
-
   width:145px;
   height:145px;
-
   margin:auto;
-
   border-radius:50%;
-
   border:3px solid rgba(255,150,70,.9);
-
   color:white;
-
-  background:
-    radial-gradient(
-      circle,
-      #25313b 0%,
-      #101820 60%,
-      #05080c 100%
-    );
-
+  background:radial-gradient(circle,#25313b 0%,#101820 60%,#05080c 100%);
   display:flex;
   flex-direction:column;
   justify-content:center;
   align-items:center;
-
-  box-shadow:
-    0 0 25px rgba(255,120,50,.8),
-    inset 0 0 20px rgba(255,255,255,.08);
-
+  box-shadow:0 0 25px rgba(255,120,50,.8), inset 0 0 20px rgba(255,255,255,.08);
+  touch-action:none;
 }
 
 .transmitting{
-
   border:3px solid #00ff88 !important;
-
   box-shadow:
     0 0 20px #00ff88,
     0 0 40px rgba(0,255,136,.7),
-    inset 0 0 20px rgba(0,255,136,.3);
-
+    inset 0 0 20px rgba(0,255,136,.3) !important;
 }
 
 .transmitting #talkMain{
-
-  color:#00ff88;
-
-  text-shadow:
-    0 0 12px rgba(0,255,136,.8);
-
+  color:#00ff88 !important;
+  text-shadow:0 0 12px rgba(0,255,136,.9);
 }
 
 #talkMain{
   font-size:28px;
   font-weight:bold;
+  color:white;
 }
 
 #talkSub{
@@ -228,56 +153,33 @@ button{
 }
 
 #status{
-
   font-size:20px;
-
-  color:#ffd18a;
-
+  color:#ffd18a !important;
   font-weight:bold;
-
 }
 
 .user{
-
   background:rgba(255,255,255,.08);
-
   border-radius:10px;
-
   padding:8px;
-
   margin-top:6px;
-
+  color:white;
 }
 
 #floatingSpeaker{
-
   position:fixed;
-
   top:15px;
-
   left:50%;
-
   transform:translateX(-50%);
-
   background:rgba(0,0,0,.85);
-
   color:#00ff88;
-
   padding:12px 20px;
-
   border-radius:999px;
-
   font-weight:bold;
-
   z-index:9999;
-
   display:none;
-
-  box-shadow:
-    0 0 20px rgba(0,255,136,.6);
-
+  box-shadow:0 0 20px rgba(0,255,136,.6);
 }
-
 </style>
 </head>
 
@@ -290,77 +192,43 @@ button{
 <h1>📻 Walkie Pro</h1>
 
 <div id="loginBox">
-
   <div class="panel">
-
     <input id="nameInput" placeholder="Tu nombre">
-
     <input id="roomInput" placeholder="Sala" value="radio-mike">
-
-    <button onclick="joinRoom()">
-      ENTRAR
-    </button>
-
+    <button onclick="joinRoom()">ENTRAR</button>
   </div>
-
 </div>
 
 <div id="radioBox" style="display:none;">
 
   <div class="panel">
-
     <p><b>Sala:</b> <span id="roomLabel"></span></p>
     <br>
     <p><b>Usuario:</b> <span id="nameLabel"></span></p>
-
   </div>
 
   <div class="panel">
-
     <p><b>ID dispositivo:</b></p>
     <br>
-
     <div class="idText" id="deviceIdLabel"></div>
-
     <br>
-
-    <p>
-      <b>ID Radio:</b>
-      <span id="myIdLabel"></span>
-    </p>
-
+    <p><b>ID Radio:</b> <span id="myIdLabel"></span></p>
   </div>
 
   <div class="wave"></div>
 
   <div id="talkBtn">
-
-    <span id="talkMain">
-      HABLAR
-    </span>
-
-    <span id="talkSub">
-      Esperando transmisión
-    </span>
-
+    <span id="talkMain">HABLAR</span>
+    <span id="talkSub">Esperando transmisión</span>
   </div>
 
   <div class="panel">
-
-    <div id="status">
-      🟢 CONECTADO
-    </div>
-
+    <div id="status">🟢 CONECTADO</div>
   </div>
 
   <div class="panel">
-
-    <h3>
-      Usuarios conectados
-    </h3>
-
+    <h3>Usuarios conectados</h3>
     <div id="usersBox"></div>
-
   </div>
 
 </div>
@@ -371,171 +239,265 @@ button{
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
 
 <script>
-
 const motorolaStart = new Audio("./assets/motorola-start.mp3");
 const motorolaEnd = new Audio("./assets/motorola-end.mp3");
 
-motorolaStart.preload="auto";
-motorolaEnd.preload="auto";
+motorolaStart.preload = "auto";
+motorolaEnd.preload = "auto";
+motorolaStart.volume = 1;
+motorolaEnd.volume = 1;
 
 let socket;
 let peer;
 let localStream;
-
-let room="";
-let myName="";
-let myPeerId="";
-let myDeviceId="";
-
-let users={};
+let room = "";
+let myName = "";
+let myPeerId = "";
+let myDeviceId = "";
+let users = {};
+let calls = {};
+let isTalking = false;
 
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
 const talkSub = document.getElementById("talkSub");
 
-function playSound(type){
+function instantBeep(type){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
 
-  const sound =
-  type==="start"
-  ?motorolaStart
-  :motorolaEnd;
+  osc.type = "square";
+  osc.frequency.value = type === "start" ? 1200 : 650;
+
+  gain.gain.setValueAtTime(0.20, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 0.08);
+}
+
+function playSound(type){
+  const sound = type === "start" ? motorolaStart : motorolaEnd;
+
+  instantBeep(type);
 
   try{
-
-    sound.currentTime=0;
-
-    sound.play();
-
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
   }catch{}
-
 }
 
 function getDeviceId(){
-
-  let id =
-  localStorage.getItem("walkie_device");
+  let id = localStorage.getItem("walkie_device");
 
   if(!id){
-
-    id =
-    "device-"+crypto.randomUUID();
-
-    localStorage.setItem(
-      "walkie_device",
-      id
-    );
-
+    id = "device-" + crypto.randomUUID();
+    localStorage.setItem("walkie_device", id);
   }
 
   return id;
-
 }
 
 function getPeerId(){
-
-  let id =
-  localStorage.getItem("walkie_radio");
+  let id = localStorage.getItem("walkie_radio");
 
   if(!id){
-
-    id =
-    "radio-"+crypto.randomUUID().replace(/-/g,"").substring(0,14);
-
-    localStorage.setItem(
-      "walkie_radio",
-      id
-    );
-
+    id = "radio-" + crypto.randomUUID().replace(/-/g,"").substring(0,14);
+    localStorage.setItem("walkie_radio", id);
   }
 
   return id;
-
 }
 
 function showSpeaker(name){
-
-  const box =
-  document.getElementById("floatingSpeaker");
-
-  box.innerText =
-  "🎙️ "+name+" está hablando";
-
-  box.style.display="block";
-
+  const box = document.getElementById("floatingSpeaker");
+  box.innerText = "🎙️ " + name + " está hablando";
+  box.style.display = "block";
 }
 
 function hideSpeaker(){
-
-  document.getElementById(
-    "floatingSpeaker"
-  ).style.display="none";
-
+  document.getElementById("floatingSpeaker").style.display = "none";
 }
 
 async function joinRoom(){
-
-  myName =
-  document.getElementById("nameInput").value.trim();
-
-  room =
-  document.getElementById("roomInput").value.trim();
+  myName = document.getElementById("nameInput").value.trim();
+  room = document.getElementById("roomInput").value.trim();
 
   if(!myName || !room){
-
     alert("Completa los datos");
-
     return;
-
   }
 
-  localStorage.setItem("walkie_name",myName);
-  localStorage.setItem("walkie_room",room);
+  localStorage.setItem("walkie_name", myName);
+  localStorage.setItem("walkie_room", room);
 
   myDeviceId = getDeviceId();
   myPeerId = getPeerId();
 
-  localStream =
-  await navigator.mediaDevices.getUserMedia({
-    audio:true
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio:true,
+    video:false
   });
 
-  localStream.getAudioTracks().forEach(
-    t=>t.enabled=false
-  );
+  localStream.getAudioTracks().forEach(t=>t.enabled=false);
 
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("radioBox").style.display="block";
+  try{
+    motorolaStart.load();
+    motorolaEnd.load();
+  }catch{}
 
-  document.getElementById("roomLabel").innerText=room;
-  document.getElementById("nameLabel").innerText=myName;
-  document.getElementById("deviceIdLabel").innerText=myDeviceId;
-  document.getElementById("myIdLabel").innerText=myPeerId;
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("radioBox").style.display = "block";
+
+  document.getElementById("roomLabel").innerText = room;
+  document.getElementById("nameLabel").innerText = myName;
+  document.getElementById("deviceIdLabel").innerText = myDeviceId;
+  document.getElementById("myIdLabel").innerText = myPeerId;
 
   socket = io();
 
-  peer = new Peer(myPeerId);
-
-  socket.emit("join-room",{
-    room,
-    peerId:myPeerId,
-    name:myName
+  peer = new Peer(myPeerId,{
+    host:location.hostname,
+    port:location.port || (location.protocol === "https:" ? 443 : 80),
+    path:"/peerjs",
+    secure:location.protocol === "https:",
+    config:{
+      iceServers:[
+        {urls:"stun:stun.l.google.com:19302"},
+        {urls:"stun:stun1.l.google.com:19302"},
+        {urls:"stun:stun2.l.google.com:19302"}
+      ]
+    }
   });
 
+  peer.on("open",id=>{
+    myPeerId = id;
+    document.getElementById("myIdLabel").innerText = id;
+
+    socket.emit("join-room",{
+      room,
+      peerId:id,
+      name:myName,
+      deviceId:myDeviceId
+    });
+  });
+
+  peer.on("call",call=>{
+    call.answer(localStream);
+
+    call.on("stream",remoteStream=>{
+      createAudio(call.peer,remoteStream);
+    });
+
+    calls[call.peer] = call;
+  });
+
+  socket.on("users-in-room",existingUsers=>{
+    existingUsers.forEach(user=>{
+      addUser(user.peerId,user.name);
+
+      if(!calls[user.peerId]){
+        const call = peer.call(user.peerId,localStream);
+
+        call.on("stream",remoteStream=>{
+          createAudio(user.peerId,remoteStream);
+        });
+
+        calls[user.peerId] = call;
+      }
+    });
+  });
+
+  socket.on("user-joined",user=>{
+    addUser(user.peerId,user.name);
+  });
+
+  socket.on("user-left",peerId=>{
+    removeUser(peerId);
+  });
+
+  socket.on("user-talking",data=>{
+    playSound("start");
+    showSpeaker(data.name);
+  });
+
+  socket.on("user-stopped-talking",()=>{
+    playSound("end");
+    hideSpeaker();
+  });
+}
+
+function createAudio(peerId,stream){
+  let audio = document.getElementById("audio-"+peerId);
+
+  if(!audio){
+    audio = document.createElement("audio");
+    audio.id = "audio-"+peerId;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    document.body.appendChild(audio);
+  }
+
+  audio.srcObject = stream;
+  audio.volume = 1;
+  audio.muted = false;
+  audio.play().catch(()=>{});
+}
+
+function addUser(peerId,name){
+  if(peerId === myPeerId) return;
+  users[peerId] = {name};
+  renderUsers();
+}
+
+function removeUser(peerId){
+  delete users[peerId];
+
+  if(calls[peerId]){
+    calls[peerId].close();
+    delete calls[peerId];
+  }
+
+  const audio = document.getElementById("audio-"+peerId);
+  if(audio) audio.remove();
+
+  renderUsers();
+}
+
+function renderUsers(){
+  const box = document.getElementById("usersBox");
+  box.innerHTML = "";
+
+  const ids = Object.keys(users);
+
+  if(ids.length === 0){
+    box.innerHTML = "<div class='user'>Esperando usuarios...</div>";
+    return;
+  }
+
+  ids.forEach(id=>{
+    const div = document.createElement("div");
+    div.className = "user";
+    div.innerHTML = "<b>🟢 " + users[id].name + "</b>";
+    box.appendChild(div);
+  });
 }
 
 function startTalking(){
+  if(isTalking) return;
+  isTalking = true;
 
   playSound("start");
 
-  localStream.getAudioTracks().forEach(
-    t=>t.enabled=true
-  );
+  localStream.getAudioTracks().forEach(t=>t.enabled=true);
 
   talkBtn.classList.add("transmitting");
-
-  talkMain.innerText="TRANSMITIENDO";
-
-  talkSub.style.display="none";
+  talkMain.innerText = "TRANSMITIENDO";
+  talkSub.style.display = "none";
 
   showSpeaker(myName);
 
@@ -543,67 +505,55 @@ function startTalking(){
     room,
     name:myName
   });
-
 }
 
 function stopTalking(){
+  if(!isTalking) return;
+  isTalking = false;
 
   playSound("end");
 
-  localStream.getAudioTracks().forEach(
-    t=>t.enabled=false
-  );
+  localStream.getAudioTracks().forEach(t=>t.enabled=false);
 
   talkBtn.classList.remove("transmitting");
-
-  talkMain.innerText="HABLAR";
-
-  talkSub.style.display="block";
+  talkMain.innerText = "HABLAR";
+  talkSub.style.display = "block";
 
   hideSpeaker();
 
   socket.emit("talking-stop",{
-    room
+    room,
+    name:myName
   });
-
 }
 
-talkBtn.addEventListener("touchstart",e=>{
+talkBtn.addEventListener("pointerdown",e=>{
   e.preventDefault();
   startTalking();
 });
 
-talkBtn.addEventListener("touchend",e=>{
+talkBtn.addEventListener("pointerup",e=>{
   e.preventDefault();
   stopTalking();
 });
 
-talkBtn.addEventListener("mousedown",e=>{
-  e.preventDefault();
-  startTalking();
-});
-
-talkBtn.addEventListener("mouseup",e=>{
+talkBtn.addEventListener("pointercancel",e=>{
   e.preventDefault();
   stopTalking();
 });
 
-window.onload=()=>{
+talkBtn.addEventListener("pointerleave",e=>{
+  e.preventDefault();
+  stopTalking();
+});
 
-  const savedName =
-  localStorage.getItem("walkie_name");
+window.addEventListener("load",()=>{
+  const savedName = localStorage.getItem("walkie_name");
+  const savedRoom = localStorage.getItem("walkie_room");
 
-  const savedRoom =
-  localStorage.getItem("walkie_room");
-
-  if(savedName)
-    document.getElementById("nameInput").value=savedName;
-
-  if(savedRoom)
-    document.getElementById("roomInput").value=savedRoom;
-
-};
-
+  if(savedName) document.getElementById("nameInput").value = savedName;
+  if(savedRoom) document.getElementById("roomInput").value = savedRoom;
+});
 </script>
 
 </body>
