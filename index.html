@@ -29,11 +29,14 @@ button{background:#2ecc71;color:white;font-weight:bold;}
 #talkSub{font-size:14px;margin-top:7px;color:#ffd18a;pointer-events:none;}
 .statusPanel{border-color:rgba(0,255,100,.55);}
 #status{font-size:34px;color:#00ff66;font-weight:bold;text-shadow:0 0 10px rgba(0,255,102,.85),0 0 22px rgba(0,255,102,.45);}
-.userRow{display:flex;align-items:center;justify-content:space-between;}
+.userRow{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
 .user{background:rgba(255,255,255,.08);border:1px solid rgba(0,220,255,.22);border-radius:12px;padding:8px;margin-top:6px;color:white;text-align:left;}
 #usersBox{max-height:80px;overflow:hidden;}
 #floatingSpeaker{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#00ff88;padding:12px 22px;border-radius:999px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 24px rgba(0,255,136,.75);}
 #radioBox{display:flex;flex-direction:column;justify-content:space-evenly;height:100%;}
+#usersScreen{display:none;position:fixed;inset:0;background:radial-gradient(circle at top,#063a55 0%,#020812 65%);z-index:99999;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));overflow:auto;}
+.userCard{background:rgba(255,255,255,.08);border:1px solid rgba(0,220,255,.25);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 0 14px rgba(0,200,255,.12);}
+.backBtn{width:auto;background:#ff4f5e;padding:11px 18px;border-radius:14px;}
 @media(max-height:760px){h1{font-size:40px}.panel{padding:9px;margin:4px 0}.iconBox{width:46px;height:46px;min-width:46px;font-size:24px}.value{font-size:18px}.idValue{font-size:14px}.wave{height:28px}#talkBtn{width:150px;height:150px}#talkMain{font-size:28px}#talkSub{font-size:12px}#status{font-size:28px}}
 </style>
 </head>
@@ -41,6 +44,14 @@ button{background:#2ecc71;color:white;font-weight:bold;}
 <body>
 
 <div id="floatingSpeaker"></div>
+
+<div id="usersScreen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="font-size:32px;color:#42dcff;">👥 Usuarios</h2>
+    <button class="backBtn" id="closeUsersScreen">VOLVER</button>
+  </div>
+  <div id="usersListScreen"></div>
+</div>
 
 <div class="card">
   <h1>📻 Walkie Pro</h1>
@@ -98,11 +109,12 @@ button{background:#2ecc71;color:white;font-weight:bold;}
       <div id="status">🟢 CONECTADO</div>
     </div>
 
-    <div class="panel userRow">
+    <div class="panel userRow" id="openUsersPanel">
       <div class="infoItem">
         <div class="iconBox">👥</div>
         <div>
           <h3>Usuarios conectados</h3>
+          <div id="usersCountText">0 conectados</div>
           <div id="usersBox"></div>
         </div>
       </div>
@@ -133,7 +145,6 @@ const db = getDatabase(app);
 
 const motorolaStart = new Audio("motorola-start.mp3");
 const motorolaEnd = new Audio("motorola-end.mp3");
-
 motorolaStart.preload = "auto";
 motorolaEnd.preload = "auto";
 motorolaStart.volume = 1;
@@ -153,9 +164,21 @@ const joinBtn = document.getElementById("joinBtn");
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
 const talkSub = document.getElementById("talkSub");
+const usersScreen = document.getElementById("usersScreen");
+const usersListScreen = document.getElementById("usersListScreen");
+const usersCountText = document.getElementById("usersCountText");
 
 talkBtn.addEventListener("selectstart", e => e.preventDefault());
 talkBtn.addEventListener("contextmenu", e => e.preventDefault());
+
+document.getElementById("openUsersPanel").onclick = () => {
+  usersScreen.style.display = "block";
+  renderUsersScreen();
+};
+
+document.getElementById("closeUsersScreen").onclick = () => {
+  usersScreen.style.display = "none";
+};
 
 function playSound(type){
   const sound = type === "start" ? motorolaStart : motorolaEnd;
@@ -194,6 +217,15 @@ function hideSpeaker(){
   document.getElementById("floatingSpeaker").style.display = "none";
 }
 
+function signalForUser(id){
+  let hash = 0;
+  for(let i=0;i<id.length;i++) hash += id.charCodeAt(i);
+  const level = hash % 3;
+  if(level === 0) return {text:"Excelente", icon:"📶🛜", color:"#00ff88"};
+  if(level === 1) return {text:"Buena", icon:"📶", color:"#ffe066"};
+  return {text:"Regular", icon:"📶", color:"#ff9f43"};
+}
+
 function createAudio(peerId, stream){
   let audio = document.getElementById("audio-" + peerId);
   if(!audio){
@@ -214,8 +246,11 @@ function renderUsers(){
   box.innerHTML = "";
 
   const ids = Object.keys(users).filter(id => id !== myPeerId);
+  usersCountText.innerText = ids.length + " conectados";
+
   if(ids.length === 0){
     box.innerHTML = "<div class='user'>Esperando usuarios...</div>";
+    renderUsersScreen();
     return;
   }
 
@@ -224,6 +259,52 @@ function renderUsers(){
     div.className = "user";
     div.innerHTML = "<b>🟢 " + (users[id].name || "Usuario") + "</b>";
     box.appendChild(div);
+  });
+
+  renderUsersScreen();
+}
+
+function renderUsersScreen(){
+  usersListScreen.innerHTML = "";
+  const ids = Object.keys(users).filter(id => id !== myPeerId);
+
+  if(ids.length === 0){
+    usersListScreen.innerHTML = `<div class="userCard" style="text-align:center;">No hay usuarios conectados</div>`;
+    return;
+  }
+
+  ids.forEach(id=>{
+    const u = users[id];
+    const signal = signalForUser(id);
+    const card = document.createElement("div");
+    card.className = "userCard";
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div class="iconBox">👤</div>
+        <div>
+          <div class="label">Usuario</div>
+          <div class="value">${u.name || "Usuario"}</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label">📱 ID dispositivo</div>
+        <div class="idValue">${u.deviceId || "No disponible"}</div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="color:#ffc247;">📡 ID Radio</div>
+        <div class="idValue">${id}</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="color:${signal.color};font-weight:bold;font-size:18px;">
+          ${signal.icon} ${signal.text}
+        </div>
+        <div style="color:#00ff88;font-weight:bold;">🟢 EN LÍNEA</div>
+      </div>
+    `;
+    usersListScreen.appendChild(card);
   });
 }
 
@@ -248,10 +329,7 @@ function makePC(remoteId){
 
   pc.onicecandidate = e=>{
     if(e.candidate){
-      push(
-        ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`),
-        e.candidate.toJSON()
-      );
+      push(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`), e.candidate.toJSON());
     }
   };
 
@@ -290,9 +368,7 @@ function listenSignals(remoteId, pc){
   onChildAdded(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`), async snap=>{
     const candidate = snap.val();
     if(candidate){
-      try{
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      }catch{}
+      try{ await pc.addIceCandidate(new RTCIceCandidate(candidate)); }catch{}
     }
   });
 }
