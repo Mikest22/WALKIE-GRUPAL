@@ -519,3 +519,432 @@ function signalForUser(id){
 
   return {text:"Regular", icon:"📶", color:"#ff9f43"};
 }
+
+function createAudio(peerId, stream){
+  let audio = document.getElementById("audio-" + peerId);
+
+  if(!audio){
+    audio = document.createElement("audio");
+    audio.id = "audio-" + peerId;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    document.body.appendChild(audio);
+  }
+
+  audio.srcObject = stream;
+  audio.volume = 1;
+  audio.muted = false;
+  audio.play().catch(()=>{});
+}
+
+function renderUsers(){
+  const box = document.getElementById("usersBox");
+  box.innerHTML = "";
+
+  const ids = Object.keys(users).filter(id => id !== mySessionId);
+
+  usersCountText.innerText = ids.length + " conectados";
+
+  if(ids.length === 0){
+    box.innerHTML = "<div class='user'>Esperando usuarios...</div>";
+    renderUsersScreen();
+    return;
+  }
+
+  ids.forEach(id=>{
+    const div = document.createElement("div");
+    div.className = "user" + (currentSpeakingSessionId === id ? " speakingUser" : "");
+    div.innerHTML =
+      "<b>" +
+      (currentSpeakingSessionId === id ? "🎙️ " : "🟢 ") +
+      (users[id].name || "Usuario") +
+      "</b>";
+
+    box.appendChild(div);
+  });
+
+  renderUsersScreen();
+}
+
+function renderUsersScreen(){
+  usersListScreen.innerHTML = "";
+
+  const ids = Object.keys(users).filter(id => id !== mySessionId);
+
+  if(ids.length === 0){
+    usersListScreen.innerHTML = `
+      <div class="userCard" style="text-align:center;">
+        No hay usuarios conectados
+      </div>
+    `;
+    return;
+  }
+
+  ids.forEach(id=>{
+    const u = users[id];
+    const signal = signalForUser(id);
+    const speaking = currentSpeakingSessionId === id;
+
+    const card = document.createElement("div");
+    card.className = "userCard" + (speaking ? " speakingCard" : "");
+
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+        <div class="iconBox">${speaking ? "🎙️" : "👤"}</div>
+        <div>
+          <div class="label">Usuario</div>
+          <div class="value">${u.name || "Usuario"}</div>
+          ${speaking ? `<div style="color:#00ff88;font-weight:bold;margin-top:4px;">TRANSMITIENDO AHORA</div>` : ""}
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label">📱 ID dispositivo</div>
+        <div class="idValue">${u.deviceId || "No disponible"}</div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div class="label" style="color:#ffc247;">📡 ID Radio</div>
+        <div class="idValue">${u.radioId || "No disponible"}</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="color:${signal.color};font-weight:bold;font-size:18px;">
+          ${signal.icon} ${signal.text}
+        </div>
+        <div style="color:#00ff88;font-weight:bold;">🟢 EN LÍNEA</div>
+      </div>
+    `;
+
+    usersListScreen.appendChild(card);
+  });
+}
+
+function cleanupPeer(remoteId){
+  if(pcs[remoteId]){
+    try{ pcs[remoteId].close(); }catch{}
+    delete pcs[remoteId];
+  }
+
+  const audio = document.getElementById("audio-" + remoteId);
+  if(audio) audio.remove();
+}
+
+function makePC(remoteId){
+  if(pcs[remoteId]) return pcs[remoteId];
+
+  const pc = new RTCPeerConnection({
+    iceServers:[
+      {urls:"stun:stun.l.google.com:19302"},
+      {urls:"stun:stun1.l.google.com:19302"},
+      {urls:"stun:stun2.l.google.com:19302"}
+    ]
+  });
+
+  localStream.getTracks().forEach(track=>{
+    pc.addTrack(track, localStream);
+  });
+
+  pc.ontrack = e=>{
+    createAudio(remoteId, e.streams[0]);
+  };
+
+  pc.onicecandidate = e=>{
+    if(e.candidate){
+      push(
+        ref(db, `rooms/${room}/signals/${remoteId}/${mySessionId}/candidates`),
+        e.candidate.toJSON()
+      );
+    }
+  };
+
+  pc.onconnectionstatechange = ()=>{
+    if(
+      pc.connectionState === "failed" ||
+      pc.connectionState === "disconnected" ||
+      pc.connectionState === "closed"
+    ){
+      cleanupPeer(remoteId);
+      setTimeout(()=>{
+        if(users[remoteId] && mySessionId > remoteId){
+          callPeer(remoteId);
+        }
+      }, 1000);
+    }
+  };
+
+  pcs[remoteId] = pc;
+  listenSignals(remoteId, pc);
+
+  return pc;
+}
+
+function listenSignals(remoteId, pc){
+  onValue(ref(db, `rooms/${room}/signals/${mySessionId}/${remoteId}/offer`), async snap=>{
+    const offer = snap.val();
+    if(!offer) return;
+
+    try{
+      if(pc.signalingState === "stable" || !pc.currentRemoteDescription){
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        await set(ref(db, `rooms/${room}/signals/${remoteId}/${mySessionId}/answer`), {
+          type: answer.type,
+          sdp: answer.sdp,
+          time: Date.now()
+        });
+      }
+    }catch{}
+  });
+
+  onValue(ref(db, `rooms/${room}/signals/${mySessionId}/${remoteId}/answer`), async snap=>{
+    const answer = snap.val();
+    if(!answer) return;
+
+    try{
+      if(pc.signalingState !== "stable"){
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      }
+    }catch{}
+  });
+
+  onChildAdded(ref(db, `rooms/${room}/signals/${mySessionId}/${remoteId}/candidates`), async snap=>{
+    const candidate = snap.val();
+
+    if(candidate){
+      try{
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }catch{}
+    }
+  });
+}
+
+async function callPeer(remoteId){
+  cleanupPeer(remoteId);
+
+  const pc = makePC(remoteId);
+
+  try{
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    await set(ref(db, `rooms/${room}/signals/${remoteId}/${mySessionId}/offer`), {
+      type: offer.type,
+      sdp: offer.sdp,
+      time: Date.now()
+    });
+  }catch{}
+}
+
+async function joinRoom(){
+  myName = document.getElementById("nameInput").value.trim();
+  room = document.getElementById("roomInput").value.trim();
+
+  if(!myName || !room){
+    alert("Completa los datos");
+    return;
+  }
+
+  localStorage.setItem("walkie_name", myName);
+  localStorage.setItem("walkie_room", room);
+
+  myDeviceId = getDeviceId();
+  myRadioId = getRadioId();
+  mySessionId = createSessionId();
+
+  try{
+    motorolaStart.load();
+    motorolaEnd.load();
+  }catch{}
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    });
+  }catch{
+    alert("Debes permitir el micrófono.");
+    return;
+  }
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("radioBox").style.display = "flex";
+
+  document.getElementById("roomLabel").innerText = room;
+  document.getElementById("nameLabel").innerText = myName;
+  document.getElementById("deviceIdLabel").innerText = myDeviceId;
+  document.getElementById("myIdLabel").innerText = myRadioId;
+
+  await remove(ref(db, `rooms/${room}/signals/${mySessionId}`));
+
+  const myRef = ref(db, `rooms/${room}/peers/${mySessionId}`);
+
+  await set(myRef, {
+    sessionId: mySessionId,
+    radioId: myRadioId,
+    name: myName,
+    deviceId: myDeviceId,
+    joinedAt: serverTimestamp()
+  });
+
+  onDisconnect(myRef).remove();
+  onDisconnect(ref(db, `rooms/${room}/signals/${mySessionId}`)).remove();
+
+  onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
+    const user = snap.val();
+    const remoteId = snap.key;
+
+    users[remoteId] = user;
+    renderUsers();
+
+    if(remoteId !== mySessionId){
+      makePC(remoteId);
+
+      if(mySessionId > remoteId){
+        setTimeout(()=>callPeer(remoteId), 700);
+      }
+    }
+  });
+
+  onChildRemoved(ref(db, `rooms/${room}/peers`), snap=>{
+    const remoteId = snap.key;
+
+    delete users[remoteId];
+    cleanupPeer(remoteId);
+    renderUsers();
+  });
+
+  onValue(ref(db, `rooms/${room}/speaking`), snap=>{
+    const data = snap.val();
+
+    if(data && data.sessionId !== mySessionId){
+      if(lastSpeakerSessionId !== data.sessionId){
+        playSound("start");
+      }
+
+      lastSpeakerSessionId = data.sessionId;
+      currentSpeakingSessionId = data.sessionId;
+
+      showSpeaker(data.name || "Usuario");
+      renderUsers();
+    }
+
+    if(!data){
+      if(lastSpeakerSessionId && lastSpeakerSessionId !== mySessionId){
+        playSound("end");
+      }
+
+      lastSpeakerSessionId = null;
+      currentSpeakingSessionId = null;
+
+      hideSpeaker();
+      renderUsers();
+    }
+  });
+}
+
+function startTalking(){
+  if(isTalking || !localStream) return;
+
+  isTalking = true;
+
+  playSound("start");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = true;
+  });
+
+  talkBtn.classList.add("transmitting");
+  talkMain.innerText = "TRANSMITIENDO";
+  talkSub.style.display = "none";
+
+  currentSpeakingSessionId = mySessionId;
+  showSpeaker(myName);
+  renderUsers();
+
+  set(ref(db, `rooms/${room}/speaking`), {
+    sessionId: mySessionId,
+    radioId: myRadioId,
+    name: myName,
+    time: Date.now()
+  });
+}
+
+function stopTalking(){
+  if(!isTalking || !localStream) return;
+
+  isTalking = false;
+
+  playSound("end");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  talkBtn.classList.remove("transmitting");
+  talkMain.innerText = "HABLAR";
+  talkSub.style.display = "block";
+
+  currentSpeakingSessionId = null;
+  hideSpeaker();
+  renderUsers();
+
+  remove(ref(db, `rooms/${room}/speaking`));
+}
+
+talkBtn.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+
+  try{
+    talkBtn.setPointerCapture(e.pointerId);
+  }catch{}
+
+  startTalking();
+});
+
+talkBtn.addEventListener("pointerup",e=>{
+  e.preventDefault();
+
+  try{
+    talkBtn.releasePointerCapture(e.pointerId);
+  }catch{}
+
+  stopTalking();
+});
+
+talkBtn.addEventListener("pointercancel",e=>{
+  e.preventDefault();
+  stopTalking();
+});
+
+window.addEventListener("pointerup",()=>{
+  stopTalking();
+});
+
+joinBtn.addEventListener("click",joinRoom);
+
+window.addEventListener("load",()=>{
+  const savedName = localStorage.getItem("walkie_name");
+  const savedRoom = localStorage.getItem("walkie_room");
+
+  if(savedName) document.getElementById("nameInput").value = savedName;
+  if(savedRoom) document.getElementById("roomInput").value = savedRoom;
+});
+
+window.addEventListener("beforeunload",()=>{
+  if(room && mySessionId){
+    remove(ref(db, `rooms/${room}/peers/${mySessionId}`));
+    remove(ref(db, `rooms/${room}/signals/${mySessionId}`));
+  }
+});
+</script>
+
+</body>
+</html>
