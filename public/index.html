@@ -348,3 +348,550 @@ z-index:10000;
 </head>
 
 <body>
+
+<div class="toast" id="toast"></div>
+
+<div class="logo">📻 Walkie Pro</div>
+
+<div class="login-box" id="loginBox">
+  <input class="input" id="nameInput" placeholder="Tu nombre">
+  <input class="input" id="roomInput" placeholder="Sala" value="radio-mike">
+  <button class="btn" id="joinBtn">ENTRAR</button>
+</div>
+
+<div class="panel" id="mainPanel">
+
+  <div class="card">
+    <div class="row">
+      <div class="icon">🏢</div>
+      <div>
+        <div class="label">Sala:</div>
+        <div class="big" id="roomLabel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="icon">👤</div>
+      <div>
+        <div class="label">Usuario:</div>
+        <div class="big" id="nameLabel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="icon">📱</div>
+      <div style="width:100%;">
+        <div class="label">ID dispositivo:</div>
+        <div class="device" id="deviceIdLabel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="icon">📡</div>
+      <div>
+        <div class="label">ID Radio:</div>
+        <div class="big" id="radioIdLabel"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lines">
+    <div class="line"></div><div class="line"></div><div class="line"></div>
+    <div class="line"></div><div class="line"></div><div class="line"></div>
+    <div class="line"></div><div class="line"></div><div class="line"></div>
+  </div>
+
+  <div class="talk-btn" id="talkBtn">
+    <div id="talkText">HABLAR</div>
+    <small id="talkSub">Esperando transmisión</small>
+  </div>
+
+  <div class="estado">🟢 CONECTADO</div>
+
+  <div class="card usuarios-box" id="openUsers">
+    <div class="icon">👥</div>
+    <div class="usuarios-info">
+      <div class="big">Usuarios conectados</div>
+      <div id="contadorUsuarios">0 conectados</div>
+      <div class="preview" id="previewUsuarios">Esperando usuarios...</div>
+    </div>
+    <div class="flecha">›</div>
+  </div>
+
+</div>
+
+<div class="pantalla-usuarios" id="pantallaUsuarios">
+  <div class="usuarios-header">
+    <h1>👥 Usuarios</h1>
+    <button class="btn-volver" id="cerrarUsuarios">VOLVER</button>
+  </div>
+  <div id="usuariosContainer"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getDatabase, ref, set, remove, onValue, onChildAdded, onChildRemoved,
+  push, onDisconnect, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDOZBVsRy8vzDl8YSrYkoOdT2kQvCP1DLw",
+  authDomain: "walkie-pro-1945a.firebaseapp.com",
+  databaseURL: "https://walkie-pro-1945a-default-rtdb.firebaseio.com/",
+  projectId: "walkie-pro-1945a",
+  storageBucket: "walkie-pro-1945a.firebasestorage.app",
+  messagingSenderId: "394474795757",
+  appId: "1:394474795757:web:275208911e6cb14757d2e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const motorolaStart = new Audio("motorola-start.mp3");
+const motorolaEnd = new Audio("motorola-end.mp3");
+motorolaStart.preload = "auto";
+motorolaEnd.preload = "auto";
+motorolaStart.volume = 1;
+motorolaEnd.volume = 1;
+
+let room = "";
+let myName = "";
+let myPeerId = "";
+let myDeviceId = "";
+let localStream = null;
+let pcs = {};
+let users = {};
+let isTalking = false;
+let lastSpeakerId = null;
+let currentSpeakingId = null;
+
+const loginBox = document.getElementById("loginBox");
+const mainPanel = document.getElementById("mainPanel");
+const nameInput = document.getElementById("nameInput");
+const roomInput = document.getElementById("roomInput");
+const joinBtn = document.getElementById("joinBtn");
+const talkBtn = document.getElementById("talkBtn");
+const talkText = document.getElementById("talkText");
+const talkSub = document.getElementById("talkSub");
+const toast = document.getElementById("toast");
+
+const pantallaUsuarios = document.getElementById("pantallaUsuarios");
+const usuariosContainer = document.getElementById("usuariosContainer");
+const contadorUsuarios = document.getElementById("contadorUsuarios");
+const previewUsuarios = document.getElementById("previewUsuarios");
+
+function playSound(type){
+  const sound = type === "start" ? motorolaStart : motorolaEnd;
+  try{
+    sound.pause();
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
+  }catch{}
+}
+
+function getDeviceId(){
+  let id = localStorage.getItem("walkie_device");
+  if(!id){
+    id = "device-" + crypto.randomUUID();
+    localStorage.setItem("walkie_device", id);
+  }
+  return id;
+}
+
+function getPeerId(){
+  let id = localStorage.getItem("walkie_radio");
+  if(!id){
+    id = "radio-" + crypto.randomUUID().replace(/-/g,"").substring(0,14);
+    localStorage.setItem("walkie_radio", id);
+  }
+  return id;
+}
+
+function showToast(text){
+  toast.innerText = text;
+  toast.style.display = "block";
+}
+
+function hideToast(){
+  toast.style.display = "none";
+}
+
+function signalForUser(id){
+  let hash = 0;
+  for(let i=0;i<id.length;i++) hash += id.charCodeAt(i);
+  const level = hash % 3;
+
+  if(level === 0) return {text:"Excelente", icon:"📶🛜", color:"#00ff88"};
+  if(level === 1) return {text:"Buena", icon:"📶", color:"#ffd54a"};
+  return {text:"Regular", icon:"📶", color:"#ff9f43"};
+}
+
+function createAudio(peerId, stream){
+  let audio = document.getElementById("audio-" + peerId);
+
+  if(!audio){
+    audio = document.createElement("audio");
+    audio.id = "audio-" + peerId;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    document.body.appendChild(audio);
+  }
+
+  audio.srcObject = stream;
+  audio.volume = 1;
+  audio.muted = false;
+  audio.play().catch(()=>{});
+}
+
+function renderUsers(){
+  const ids = Object.keys(users).filter(id => id !== myPeerId);
+
+  contadorUsuarios.innerText = ids.length + " conectados";
+
+  if(ids.length === 0){
+    previewUsuarios.innerText = "Esperando usuarios...";
+  }else{
+    previewUsuarios.innerText = ids.map(id => users[id].name || "Usuario").join(", ");
+  }
+
+  renderUsersScreen();
+}
+
+function renderUsersScreen(){
+  usuariosContainer.innerHTML = "";
+
+  const ids = Object.keys(users).filter(id => id !== myPeerId);
+
+  if(ids.length === 0){
+    usuariosContainer.innerHTML = `
+      <div class="usuario-card" style="text-align:center;">
+        No hay usuarios conectados
+      </div>
+    `;
+    return;
+  }
+
+  ids.forEach(id=>{
+    const u = users[id];
+    const signal = signalForUser(id);
+    const hablando = currentSpeakingId === id;
+
+    const card = document.createElement("div");
+    card.className = "usuario-card" + (hablando ? " hablando-card" : "");
+
+    card.innerHTML = `
+      <div class="usuario-top">
+        <div class="usuario-avatar">${hablando ? "🎙️" : "👤"}</div>
+        <div>
+          <div class="usuario-label">Usuario</div>
+          <div class="usuario-nombre">${u.name || "Usuario"}</div>
+          ${hablando ? `<div style="color:#00ff66;font-weight:bold;font-size:24px;">TRANSMITIENDO AHORA</div>` : ""}
+        </div>
+      </div>
+
+      <div class="usuario-label">📱 ID dispositivo</div>
+      <div class="usuario-dato">${u.deviceId || "No disponible"}</div>
+
+      <div class="usuario-label">📡 ID Radio</div>
+      <div class="usuario-dato">${id}</div>
+
+      <div class="senal" style="color:${signal.color};">
+        ${signal.icon} Señal ${signal.text}
+      </div>
+
+      <div class="estado-linea">🟢 EN LÍNEA</div>
+    `;
+
+    usuariosContainer.appendChild(card);
+  });
+}
+
+function makePC(remoteId){
+  if(pcs[remoteId]) return pcs[remoteId];
+
+  const pc = new RTCPeerConnection({
+    iceServers:[
+      {urls:"stun:stun.l.google.com:19302"},
+      {urls:"stun:stun1.l.google.com:19302"},
+      {urls:"stun:stun2.l.google.com:19302"}
+    ]
+  });
+
+  localStream.getTracks().forEach(track=>{
+    pc.addTrack(track, localStream);
+  });
+
+  pc.ontrack = e=>{
+    createAudio(remoteId, e.streams[0]);
+  };
+
+  pc.onicecandidate = e=>{
+    if(e.candidate){
+      push(
+        ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`),
+        e.candidate.toJSON()
+      );
+    }
+  };
+
+  pcs[remoteId] = pc;
+  listenSignals(remoteId, pc);
+  return pc;
+}
+
+function listenSignals(remoteId, pc){
+  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/offer`), async snap=>{
+    const offer = snap.val();
+    if(!offer) return;
+
+    if(!pc.currentRemoteDescription){
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/answer`), {
+        type: answer.type,
+        sdp: answer.sdp,
+        time: Date.now()
+      });
+    }
+  });
+
+  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/answer`), async snap=>{
+    const answer = snap.val();
+    if(!answer) return;
+
+    if(pc.signalingState !== "stable"){
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+  });
+
+  onChildAdded(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`), async snap=>{
+    const candidate = snap.val();
+    if(candidate){
+      try{
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }catch{}
+    }
+  });
+}
+
+async function callPeer(remoteId){
+  const pc = makePC(remoteId);
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/offer`), {
+    type: offer.type,
+    sdp: offer.sdp,
+    time: Date.now()
+  });
+}
+
+async function joinRoom(){
+  myName = nameInput.value.trim();
+  room = roomInput.value.trim();
+
+  if(!myName || !room){
+    alert("Completa los datos");
+    return;
+  }
+
+  localStorage.setItem("walkie_name", myName);
+  localStorage.setItem("walkie_room", room);
+
+  myDeviceId = getDeviceId();
+  myPeerId = getPeerId();
+
+  try{
+    motorolaStart.load();
+    motorolaEnd.load();
+  }catch{}
+
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio:true,
+    video:false
+  });
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  loginBox.style.display = "none";
+  mainPanel.style.display = "block";
+
+  document.getElementById("roomLabel").innerText = room;
+  document.getElementById("nameLabel").innerText = myName;
+  document.getElementById("deviceIdLabel").innerText = myDeviceId;
+  document.getElementById("radioIdLabel").innerText = myPeerId;
+
+  const myRef = ref(db, `rooms/${room}/peers/${myPeerId}`);
+  await set(myRef, {
+    id: myPeerId,
+    name: myName,
+    deviceId: myDeviceId,
+    joinedAt: serverTimestamp()
+  });
+
+  onDisconnect(myRef).remove();
+  onDisconnect(ref(db, `rooms/${room}/signals/${myPeerId}`)).remove();
+
+  onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
+    const user = snap.val();
+    const remoteId = snap.key;
+
+    users[remoteId] = user;
+    renderUsers();
+
+    if(remoteId !== myPeerId){
+      makePC(remoteId);
+
+      if(myPeerId > remoteId){
+        setTimeout(()=>callPeer(remoteId), 500);
+      }
+    }
+  });
+
+  onChildRemoved(ref(db, `rooms/${room}/peers`), snap=>{
+    const remoteId = snap.key;
+    delete users[remoteId];
+    renderUsers();
+
+    if(pcs[remoteId]){
+      pcs[remoteId].close();
+      delete pcs[remoteId];
+    }
+
+    const audio = document.getElementById("audio-" + remoteId);
+    if(audio) audio.remove();
+  });
+
+  onValue(ref(db, `rooms/${room}/speaking`), snap=>{
+    const data = snap.val();
+
+    if(data && data.id !== myPeerId){
+      if(lastSpeakerId !== data.id){
+        playSound("start");
+      }
+
+      lastSpeakerId = data.id;
+      currentSpeakingId = data.id;
+
+      showToast("🎙️ " + (data.name || "Usuario") + " está hablando");
+      renderUsersScreen();
+    }
+
+    if(!data){
+      if(lastSpeakerId && lastSpeakerId !== myPeerId){
+        playSound("end");
+      }
+
+      lastSpeakerId = null;
+      currentSpeakingId = null;
+
+      hideToast();
+      renderUsersScreen();
+    }
+  });
+}
+
+function startTalking(){
+  if(isTalking || !localStream) return;
+  isTalking = true;
+
+  playSound("start");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = true;
+  });
+
+  talkBtn.classList.add("transmitiendo");
+  talkText.innerText = "TRANSMITIENDO";
+  talkSub.style.display = "none";
+
+  currentSpeakingId = myPeerId;
+  showToast("🎙️ " + myName + " está hablando");
+  renderUsersScreen();
+
+  set(ref(db, `rooms/${room}/speaking`), {
+    id: myPeerId,
+    name: myName,
+    time: Date.now()
+  });
+}
+
+function stopTalking(){
+  if(!isTalking || !localStream) return;
+  isTalking = false;
+
+  playSound("end");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  talkBtn.classList.remove("transmitiendo");
+  talkText.innerText = "HABLAR";
+  talkSub.style.display = "block";
+
+  currentSpeakingId = null;
+  hideToast();
+  renderUsersScreen();
+
+  remove(ref(db, `rooms/${room}/speaking`));
+}
+
+talkBtn.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  try{ talkBtn.setPointerCapture(e.pointerId); }catch{}
+  startTalking();
+});
+
+talkBtn.addEventListener("pointerup",e=>{
+  e.preventDefault();
+  try{ talkBtn.releasePointerCapture(e.pointerId); }catch{}
+  stopTalking();
+});
+
+talkBtn.addEventListener("pointercancel",e=>{
+  e.preventDefault();
+  stopTalking();
+});
+
+window.addEventListener("pointerup",()=>stopTalking());
+
+joinBtn.addEventListener("click",joinRoom);
+
+document.getElementById("openUsers").addEventListener("click",()=>{
+  pantallaUsuarios.style.display = "block";
+  renderUsersScreen();
+});
+
+document.getElementById("cerrarUsuarios").addEventListener("click",()=>{
+  pantallaUsuarios.style.display = "none";
+});
+
+window.addEventListener("load",()=>{
+  const savedName = localStorage.getItem("walkie_name");
+  const savedRoom = localStorage.getItem("walkie_room");
+
+  if(savedName) nameInput.value = savedName;
+  if(savedRoom) roomInput.value = savedRoom;
+});
+
+window.addEventListener("beforeunload",()=>{
+  if(room && myPeerId){
+    remove(ref(db, `rooms/${room}/peers/${myPeerId}`));
+  }
+});
+</script>
+
+</body>
+</html>
