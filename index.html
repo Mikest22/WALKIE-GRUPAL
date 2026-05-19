@@ -582,3 +582,285 @@ function renderUsersScreen(){
     usersListScreen.appendChild(card);
   });
 }
+
+function makePC(remoteId){
+  if(pcs[remoteId]) return pcs[remoteId];
+
+  const pc = new RTCPeerConnection({
+    iceServers:[
+      {urls:"stun:stun.l.google.com:19302"},
+      {urls:"stun:stun1.l.google.com:19302"},
+      {urls:"stun:stun2.l.google.com:19302"}
+    ]
+  });
+
+  localStream.getTracks().forEach(track=>{
+    pc.addTrack(track, localStream);
+  });
+
+  pc.ontrack = e=>{
+    createAudio(remoteId, e.streams[0]);
+  };
+
+  pc.onicecandidate = e=>{
+    if(e.candidate){
+      push(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`), e.candidate.toJSON());
+    }
+  };
+
+  pcs[remoteId] = pc;
+  listenSignals(remoteId, pc);
+  return pc;
+}
+
+function listenSignals(remoteId, pc){
+  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/offer`), async snap=>{
+    const offer = snap.val();
+    if(!offer) return;
+
+    if(!pc.currentRemoteDescription){
+      await pc.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/answer`), {
+        type: answer.type,
+        sdp: answer.sdp,
+        time: Date.now()
+      });
+    }
+  });
+
+  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/answer`), async snap=>{
+    const answer = snap.val();
+    if(!answer) return;
+
+    if(pc.signalingState !== "stable"){
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+    }
+  });
+
+  onChildAdded(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`), async snap=>{
+    const candidate = snap.val();
+    if(candidate){
+      try{
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }catch{}
+    }
+  });
+}
+
+async function callPeer(remoteId){
+  const pc = makePC(remoteId);
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/offer`), {
+    type: offer.type,
+    sdp: offer.sdp,
+    time: Date.now()
+  });
+}
+
+async function joinRoom(){
+  myName = document.getElementById("nameInput").value.trim();
+  room = document.getElementById("roomInput").value.trim();
+
+  if(!myName || !room){
+    alert("Completa los datos");
+    return;
+  }
+
+  localStorage.setItem("walkie_name", myName);
+  localStorage.setItem("walkie_room", room);
+
+  myDeviceId = getDeviceId();
+  myPeerId = getPeerId();
+
+  try{
+    motorolaStart.load();
+    motorolaEnd.load();
+  }catch{}
+
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio:true,
+    video:false
+  });
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("radioBox").style.display = "flex";
+
+  document.getElementById("roomLabel").innerText = room;
+  document.getElementById("nameLabel").innerText = myName;
+  document.getElementById("deviceIdLabel").innerText = myDeviceId;
+  document.getElementById("myIdLabel").innerText = myPeerId;
+
+  const myRef = ref(db, `rooms/${room}/peers/${myPeerId}`);
+
+  await set(myRef, {
+    id: myPeerId,
+    name: myName,
+    deviceId: myDeviceId,
+    joinedAt: serverTimestamp()
+  });
+
+  onDisconnect(myRef).remove();
+  onDisconnect(ref(db, `rooms/${room}/signals/${myPeerId}`)).remove();
+
+  onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
+    const user = snap.val();
+    const remoteId = snap.key;
+
+    users[remoteId] = user;
+    renderUsers();
+
+    if(remoteId !== myPeerId){
+      makePC(remoteId);
+
+      if(myPeerId > remoteId){
+        setTimeout(()=>callPeer(remoteId), 500);
+      }
+    }
+  });
+
+  onChildRemoved(ref(db, `rooms/${room}/peers`), snap=>{
+    const remoteId = snap.key;
+    delete users[remoteId];
+    renderUsers();
+
+    if(pcs[remoteId]){
+      pcs[remoteId].close();
+      delete pcs[remoteId];
+    }
+
+    const audio = document.getElementById("audio-" + remoteId);
+    if(audio) audio.remove();
+  });
+
+  onValue(ref(db, `rooms/${room}/speaking`), snap=>{
+    const data = snap.val();
+
+    if(data && data.id !== myPeerId){
+      if(lastSpeakerId !== data.id){
+        playSound("start");
+      }
+
+      lastSpeakerId = data.id;
+      currentSpeakingId = data.id;
+
+      showSpeaker(data.name || "Usuario");
+      renderUsers();
+    }
+
+    if(!data){
+      if(lastSpeakerId && lastSpeakerId !== myPeerId){
+        playSound("end");
+      }
+
+      lastSpeakerId = null;
+      currentSpeakingId = null;
+
+      hideSpeaker();
+      renderUsers();
+    }
+  });
+}
+
+function startTalking(){
+  if(isTalking || !localStream) return;
+  isTalking = true;
+
+  playSound("start");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = true;
+  });
+
+  talkBtn.classList.add("transmitting");
+  talkMain.innerText = "TRANSMITIENDO";
+  talkSub.style.display = "none";
+
+  currentSpeakingId = myPeerId;
+  showSpeaker(myName);
+  renderUsers();
+
+  set(ref(db, `rooms/${room}/speaking`), {
+    id: myPeerId,
+    name: myName,
+    time: Date.now()
+  });
+}
+
+function stopTalking(){
+  if(!isTalking || !localStream) return;
+  isTalking = false;
+
+  playSound("end");
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  talkBtn.classList.remove("transmitting");
+  talkMain.innerText = "HABLAR";
+  talkSub.style.display = "block";
+
+  currentSpeakingId = null;
+  hideSpeaker();
+  renderUsers();
+
+  remove(ref(db, `rooms/${room}/speaking`));
+}
+
+talkBtn.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+  try{ talkBtn.setPointerCapture(e.pointerId); }catch{}
+  startTalking();
+});
+
+talkBtn.addEventListener("pointerup",e=>{
+  e.preventDefault();
+  try{ talkBtn.releasePointerCapture(e.pointerId); }catch{}
+  stopTalking();
+});
+
+talkBtn.addEventListener("pointercancel",e=>{
+  e.preventDefault();
+  stopTalking();
+});
+
+talkBtn.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  startTalking();
+},{passive:false});
+
+talkBtn.addEventListener("touchend",e=>{
+  e.preventDefault();
+  stopTalking();
+},{passive:false});
+
+window.addEventListener("pointerup",()=>stopTalking());
+
+joinBtn.addEventListener("click",joinRoom);
+
+window.addEventListener("load",()=>{
+  const savedName = localStorage.getItem("walkie_name");
+  const savedRoom = localStorage.getItem("walkie_room");
+
+  if(savedName) document.getElementById("nameInput").value = savedName;
+  if(savedRoom) document.getElementById("roomInput").value = savedRoom;
+});
+
+window.addEventListener("beforeunload",()=>{
+  if(room && myPeerId){
+    remove(ref(db, `rooms/${room}/peers/${myPeerId}`));
+  }
+});
+</script>
+
+</body>
+</html>
