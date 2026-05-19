@@ -306,3 +306,216 @@ button{
 }
 </style>
 </head>
+
+<body>
+
+<div id="floatingSpeaker"></div>
+
+<div id="usersScreen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <h2 style="font-size:32px;color:#42dcff;">👥 Usuarios</h2>
+    <button class="backBtn" id="closeUsersScreen">VOLVER</button>
+  </div>
+  <div id="usersListScreen"></div>
+</div>
+
+<div class="card">
+  <h1>📻 Walkie Pro</h1>
+
+  <div id="loginBox">
+    <div class="panel">
+      <input id="nameInput" placeholder="Tu nombre">
+      <input id="roomInput" placeholder="Sala" value="radio-mike">
+      <button id="joinBtn">ENTRAR</button>
+    </div>
+  </div>
+
+  <div id="radioBox" style="display:none;">
+    <div class="panel infoGrid">
+      <div class="infoItem">
+        <div class="iconBox">🏢</div>
+        <div>
+          <div class="label">Sala:</div>
+          <div class="value" id="roomLabel"></div>
+        </div>
+      </div>
+
+      <div class="infoItem">
+        <div class="iconBox">👤</div>
+        <div>
+          <div class="label">Usuario:</div>
+          <div class="value" id="nameLabel"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox">📱</div>
+      <div style="width:100%;">
+        <div class="label">ID dispositivo:</div>
+        <div class="idValue" id="deviceIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox">📡</div>
+      <div>
+        <div class="label" style="color:#ffc247;">ID Radio:</div>
+        <div class="value" id="myIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="wave"></div>
+
+    <div id="talkBtn">
+      <span id="talkMain">HABLAR</span>
+      <span id="talkSub">Esperando transmisión</span>
+    </div>
+
+    <div class="panel statusPanel">
+      <div id="status">🟢 CONECTADO</div>
+    </div>
+
+    <div class="panel userRow" id="openUsersPanel">
+      <div class="infoItem">
+        <div class="iconBox">👥</div>
+        <div>
+          <h3>Usuarios conectados</h3>
+          <div id="usersCountText">0 conectados</div>
+          <div id="usersBox"></div>
+        </div>
+      </div>
+      <div style="font-size:34px;">›</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  set,
+  remove,
+  onValue,
+  onChildAdded,
+  onChildRemoved,
+  push,
+  onDisconnect,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDOZBVsRy8vzDl8YSrYkoOdT2kQvCP1DLw",
+  authDomain: "walkie-pro-1945a.firebaseapp.com",
+  databaseURL: "https://walkie-pro-1945a-default-rtdb.firebaseio.com/",
+  projectId: "walkie-pro-1945a",
+  storageBucket: "walkie-pro-1945a.firebasestorage.app",
+  messagingSenderId: "394474795757",
+  appId: "1:394474795757:web:275208911e6cb14757d2e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const motorolaStart = new Audio("motorola-start.mp3");
+const motorolaEnd = new Audio("motorola-end.mp3");
+
+motorolaStart.preload = "auto";
+motorolaEnd.preload = "auto";
+motorolaStart.volume = 1;
+motorolaEnd.volume = 1;
+
+let room = "";
+let myName = "";
+let myRadioId = "";
+let mySessionId = "";
+let myDeviceId = "";
+let localStream = null;
+
+let pcs = {};
+let users = {};
+let isTalking = false;
+let lastSpeakerSessionId = null;
+let currentSpeakingSessionId = null;
+
+const joinBtn = document.getElementById("joinBtn");
+const talkBtn = document.getElementById("talkBtn");
+const talkMain = document.getElementById("talkMain");
+const talkSub = document.getElementById("talkSub");
+const usersScreen = document.getElementById("usersScreen");
+const usersListScreen = document.getElementById("usersListScreen");
+const usersCountText = document.getElementById("usersCountText");
+
+talkBtn.addEventListener("selectstart", e => e.preventDefault());
+talkBtn.addEventListener("contextmenu", e => e.preventDefault());
+
+document.getElementById("openUsersPanel").onclick = () => {
+  usersScreen.style.display = "block";
+  renderUsersScreen();
+};
+
+document.getElementById("closeUsersScreen").onclick = () => {
+  usersScreen.style.display = "none";
+};
+
+function playSound(type){
+  const sound = type === "start" ? motorolaStart : motorolaEnd;
+
+  try{
+    sound.pause();
+    sound.currentTime = 0;
+    sound.play().catch(()=>{});
+  }catch{}
+}
+
+function getDeviceId(){
+  let id = localStorage.getItem("walkie_device");
+
+  if(!id){
+    id = "device-" + crypto.randomUUID();
+    localStorage.setItem("walkie_device", id);
+  }
+
+  return id;
+}
+
+function getRadioId(){
+  let id = localStorage.getItem("walkie_radio");
+
+  if(!id){
+    id = "radio-" + crypto.randomUUID().replace(/-/g,"").substring(0,14);
+    localStorage.setItem("walkie_radio", id);
+  }
+
+  return id;
+}
+
+function createSessionId(){
+  return "session-" + crypto.randomUUID().replace(/-/g,"").substring(0,18);
+}
+
+function showSpeaker(name){
+  const box = document.getElementById("floatingSpeaker");
+  box.innerText = "🎙️ " + name + " está hablando";
+  box.style.display = "block";
+}
+
+function hideSpeaker(){
+  document.getElementById("floatingSpeaker").style.display = "none";
+}
+
+function signalForUser(id){
+  let hash = 0;
+
+  for(let i=0;i<id.length;i++){
+    hash += id.charCodeAt(i);
+  }
+
+  const level = hash % 3;
+
+  if(level === 0) return {text:"Excelente", icon:"📶🛜", color:"#00ff88"};
+  if(level === 1) return {text:"Buena", icon:"📶", color:"#ffe066"};
+
+  return {text:"Regular", icon:"📶", color:"#ff9f43"};
+}
