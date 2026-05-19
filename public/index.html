@@ -6,37 +6,35 @@
 <title>Walkie Pro</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
-html,body{width:100%;height:100dvh;overflow:hidden;font-family:Arial,sans-serif;background:#020812;color:white;}
-body{display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at top,#063a55 0%,transparent 35%),radial-gradient(circle at bottom,#001f1e 0%,#020812 75%);}
-.card{width:100vw;height:100dvh;max-width:430px;padding:calc(8px + env(safe-area-inset-top)) 18px calc(8px + env(safe-area-inset-bottom));overflow:hidden;display:flex;flex-direction:column;justify-content:space-evenly;background:radial-gradient(circle at 50% 45%,rgba(0,190,255,.11),transparent 32%),linear-gradient(180deg,rgba(2,25,38,.98),rgba(0,15,22,.98));}
-h1{text-align:center;font-size:46px;line-height:1;font-family:Impact,Arial Black,sans-serif;color:#ffe0ad;text-shadow:0 0 16px rgba(255,185,90,.9),4px 4px 0 rgba(18,9,35,.95);}
-.panel{border:1px solid rgba(0,220,255,.48);border-radius:18px;background:rgba(0,25,35,.72);box-shadow:inset 0 0 20px rgba(0,210,255,.08),0 0 12px rgba(0,200,255,.08);padding:12px;margin:5px 0;}
-.infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.infoItem,.fullItem{display:flex;align-items:center;gap:13px;text-align:left;}
-.iconBox{min-width:54px;width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;background:rgba(0,180,255,.12);border:1px solid rgba(0,220,255,.22);box-shadow:inset 0 0 18px rgba(0,220,255,.08);}
-.label{color:#42dcff;font-weight:bold;font-size:15px;margin-bottom:5px;}
-.value{color:#fff;font-weight:bold;font-size:21px;}
-.idValue{color:#e6fbff;font-size:16px;word-break:break-word;background:rgba(255,255,255,.09);border:1px solid rgba(0,220,255,.22);border-radius:12px;padding:8px 10px;margin-top:5px;}
-input,button{width:100%;border:none;border-radius:14px;padding:14px;font-size:18px;margin-top:8px;}
-input{background:rgba(255,255,255,.12);color:white;text-align:center;border:1px solid rgba(0,220,255,.3);user-select:text;-webkit-user-select:text;}
-button{background:#2ecc71;color:white;font-weight:bold;}
-.wave{height:40px;opacity:.85;background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,255,220,.8) 14px 18px,transparent 18px 28px);filter:drop-shadow(0 0 8px rgba(0,255,220,.35));}
-#talkBtn{width:180px;height:180px;margin:4px auto;border-radius:50%;border:4px solid #ff9a37;color:white;background:radial-gradient(circle at center,#172431 0%,#081018 58%,#02060a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:0 0 20px rgba(255,140,40,.95),0 0 48px rgba(255,115,20,.45),inset 0 0 35px rgba(255,255,255,.07);touch-action:none;position:relative;-webkit-touch-callout:none;}
-.transmitting{border:4px solid #00ff88 !important;box-shadow:0 0 20px #00ff88,0 0 45px rgba(0,255,136,.75),inset 0 0 25px rgba(0,255,136,.3) !important;}
-.transmitting #talkMain{color:#00ff88 !important;text-shadow:0 0 14px rgba(0,255,136,.95);}
-#talkMain{font-size:32px;font-weight:bold;color:white;pointer-events:none;}
-#talkSub{font-size:14px;margin-top:7px;color:#ffd18a;pointer-events:none;}
-.statusPanel{border-color:rgba(0,255,100,.55);}
-#status{font-size:34px;color:#00ff66;font-weight:bold;text-shadow:0 0 10px rgba(0,255,102,.85),0 0 22px rgba(0,255,102,.45);}
-.userRow{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
-.user{background:rgba(255,255,255,.08);border:1px solid rgba(0,220,255,.22);border-radius:12px;padding:8px;margin-top:6px;color:white;text-align:left;}
-#usersBox{max-height:80px;overflow:hidden;}
-#floatingSpeaker{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#00ff88;padding:12px 22px;border-radius:999px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 24px rgba(0,255,136,.75);}
-#radioBox{display:flex;flex-direction:column;justify-content:space-evenly;height:100%;}
-#usersScreen{display:none;position:fixed;inset:0;background:radial-gradient(circle at top,#063a55 0%,#020812 65%);z-index:99999;padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));overflow:auto;}
-.userCard{background:rgba(255,255,255,.08);border:1px solid rgba(0,220,255,.25);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 0 14px rgba(0,200,255,.12);}
-.backBtn{width:auto;background:#ff4f5e;padding:11px 18px;border-radius:14px;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+html,body{width:100%;height:100dvh;overflow:hidden;font-family:Arial,sans-serif;background:#020812;color:white}
+body{display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at top,#063a55 0%,transparent 35%),radial-gradient(circle at bottom,#001f1e 0%,#020812 75%)}
+.card{width:100vw;height:100dvh;max-width:430px;padding:calc(8px + env(safe-area-inset-top)) 18px calc(8px + env(safe-area-inset-bottom));overflow:hidden;display:flex;flex-direction:column;justify-content:space-evenly;background:radial-gradient(circle at 50% 45%,rgba(0,190,255,.11),transparent 32%),linear-gradient(180deg,rgba(2,25,38,.98),rgba(0,15,22,.98))}
+h1{text-align:center;font-size:46px;line-height:1;font-family:Impact,Arial Black,sans-serif;color:#ffe0ad;text-shadow:0 0 16px rgba(255,185,90,.9),4px 4px 0 rgba(18,9,35,.95)}
+.panel{border:1px solid rgba(0,220,255,.48);border-radius:18px;background:rgba(0,25,35,.72);box-shadow:inset 0 0 20px rgba(0,210,255,.08),0 0 12px rgba(0,200,255,.08);padding:12px;margin:5px 0}
+.infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.infoItem,.fullItem{display:flex;align-items:center;gap:13px;text-align:left}
+.iconBox{min-width:54px;width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;background:rgba(0,180,255,.12);border:1px solid rgba(0,220,255,.22);box-shadow:inset 0 0 18px rgba(0,220,255,.08)}
+.label{color:#42dcff;font-weight:bold;font-size:15px;margin-bottom:5px}
+.value{color:#fff;font-weight:bold;font-size:21px}
+.idValue{color:#e6fbff;font-size:16px;word-break:break-word;background:rgba(255,255,255,.09);border:1px solid rgba(0,220,255,.22);border-radius:12px;padding:8px 10px;margin-top:5px}
+input,button{width:100%;border:none;border-radius:14px;padding:14px;font-size:18px;margin-top:8px}
+input{background:rgba(255,255,255,.12);color:white;text-align:center;border:1px solid rgba(0,220,255,.3);user-select:text;-webkit-user-select:text}
+button{background:#2ecc71;color:white;font-weight:bold}
+.wave{height:40px;opacity:.85;background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,255,220,.8) 14px 18px,transparent 18px 28px);filter:drop-shadow(0 0 8px rgba(0,255,220,.35))}
+#talkBtn{width:180px;height:180px;margin:4px auto;border-radius:50%;border:4px solid #ff9a37;color:white;background:radial-gradient(circle at center,#172431 0%,#081018 58%,#02060a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;box-shadow:0 0 20px rgba(255,140,40,.95),0 0 48px rgba(255,115,20,.45),inset 0 0 35px rgba(255,255,255,.07);touch-action:none;position:relative}
+#talkBtn *{pointer-events:none;user-select:none!important;-webkit-user-select:none!important;-webkit-touch-callout:none!important}
+.transmitting{border:4px solid #00ff88!important;box-shadow:0 0 20px #00ff88,0 0 45px rgba(0,255,136,.75),inset 0 0 25px rgba(0,255,136,.3)!important}
+.transmitting #talkMain{color:#00ff88!important;text-shadow:0 0 14px rgba(0,255,136,.95)}
+#talkMain{font-size:32px;font-weight:bold;color:white}
+#talkSub{font-size:14px;margin-top:7px;color:#ffd18a}
+.statusPanel{border-color:rgba(0,255,100,.55)}
+#status{font-size:34px;color:#00ff66;font-weight:bold;text-shadow:0 0 10px rgba(0,255,102,.85),0 0 22px rgba(0,255,102,.45)}
+.userRow{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.user{background:rgba(255,255,255,.08);border:1px solid rgba(0,220,255,.22);border-radius:12px;padding:8px;margin-top:6px;color:white;text-align:left}
+#usersBox{max-height:80px;overflow:hidden}
+#floatingSpeaker{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#00ff88;padding:12px 22px;border-radius:999px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 24px rgba(0,255,136,.75)}
+#radioBox{display:flex;flex-direction:column;justify-content:space-evenly;height:100%}
 @media(max-height:760px){h1{font-size:40px}.panel{padding:9px;margin:4px 0}.iconBox{width:46px;height:46px;min-width:46px;font-size:24px}.value{font-size:18px}.idValue{font-size:14px}.wave{height:28px}#talkBtn{width:150px;height:150px}#talkMain{font-size:28px}#talkSub{font-size:12px}#status{font-size:28px}}
 </style>
 </head>
@@ -44,14 +42,6 @@ button{background:#2ecc71;color:white;font-weight:bold;}
 <body>
 
 <div id="floatingSpeaker"></div>
-
-<div id="usersScreen">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-    <h2 style="font-size:32px;color:#42dcff;">👥 Usuarios</h2>
-    <button class="backBtn" id="closeUsersScreen">VOLVER</button>
-  </div>
-  <div id="usersListScreen"></div>
-</div>
 
 <div class="card">
   <h1>📻 Walkie Pro</h1>
@@ -109,7 +99,7 @@ button{background:#2ecc71;color:white;font-weight:bold;}
       <div id="status">🟢 CONECTADO</div>
     </div>
 
-    <div class="panel userRow" id="openUsersPanel">
+    <div class="panel userRow">
       <div class="infoItem">
         <div class="iconBox">👥</div>
         <div>
@@ -164,21 +154,7 @@ const joinBtn = document.getElementById("joinBtn");
 const talkBtn = document.getElementById("talkBtn");
 const talkMain = document.getElementById("talkMain");
 const talkSub = document.getElementById("talkSub");
-const usersScreen = document.getElementById("usersScreen");
-const usersListScreen = document.getElementById("usersListScreen");
 const usersCountText = document.getElementById("usersCountText");
-
-talkBtn.addEventListener("selectstart", e => e.preventDefault());
-talkBtn.addEventListener("contextmenu", e => e.preventDefault());
-
-document.getElementById("openUsersPanel").onclick = () => {
-  usersScreen.style.display = "block";
-  renderUsersScreen();
-};
-
-document.getElementById("closeUsersScreen").onclick = () => {
-  usersScreen.style.display = "none";
-};
 
 function playSound(type){
   const sound = type === "start" ? motorolaStart : motorolaEnd;
@@ -217,15 +193,6 @@ function hideSpeaker(){
   document.getElementById("floatingSpeaker").style.display = "none";
 }
 
-function signalForUser(id){
-  let hash = 0;
-  for(let i=0;i<id.length;i++) hash += id.charCodeAt(i);
-  const level = hash % 3;
-  if(level === 0) return {text:"Excelente", icon:"📶🛜", color:"#00ff88"};
-  if(level === 1) return {text:"Buena", icon:"📶", color:"#ffe066"};
-  return {text:"Regular", icon:"📶", color:"#ff9f43"};
-}
-
 function createAudio(peerId, stream){
   let audio = document.getElementById("audio-" + peerId);
   if(!audio){
@@ -250,7 +217,6 @@ function renderUsers(){
 
   if(ids.length === 0){
     box.innerHTML = "<div class='user'>Esperando usuarios...</div>";
-    renderUsersScreen();
     return;
   }
 
@@ -259,52 +225,6 @@ function renderUsers(){
     div.className = "user";
     div.innerHTML = "<b>🟢 " + (users[id].name || "Usuario") + "</b>";
     box.appendChild(div);
-  });
-
-  renderUsersScreen();
-}
-
-function renderUsersScreen(){
-  usersListScreen.innerHTML = "";
-  const ids = Object.keys(users).filter(id => id !== myPeerId);
-
-  if(ids.length === 0){
-    usersListScreen.innerHTML = `<div class="userCard" style="text-align:center;">No hay usuarios conectados</div>`;
-    return;
-  }
-
-  ids.forEach(id=>{
-    const u = users[id];
-    const signal = signalForUser(id);
-    const card = document.createElement("div");
-    card.className = "userCard";
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-        <div class="iconBox">👤</div>
-        <div>
-          <div class="label">Usuario</div>
-          <div class="value">${u.name || "Usuario"}</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <div class="label">📱 ID dispositivo</div>
-        <div class="idValue">${u.deviceId || "No disponible"}</div>
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <div class="label" style="color:#ffc247;">📡 ID Radio</div>
-        <div class="idValue">${id}</div>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="color:${signal.color};font-weight:bold;font-size:18px;">
-          ${signal.icon} ${signal.text}
-        </div>
-        <div style="color:#00ff88;font-weight:bold;">🟢 EN LÍNEA</div>
-      </div>
-    `;
-    usersListScreen.appendChild(card);
   });
 }
 
@@ -368,7 +288,9 @@ function listenSignals(remoteId, pc){
   onChildAdded(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`), async snap=>{
     const candidate = snap.val();
     if(candidate){
-      try{ await pc.addIceCandidate(new RTCIceCandidate(candidate)); }catch{}
+      try{
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }catch{}
     }
   });
 }
@@ -405,10 +327,15 @@ async function joinRoom(){
     motorolaEnd.load();
   }catch{}
 
-  localStream = await navigator.mediaDevices.getUserMedia({
-    audio:true,
-    video:false
-  });
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    });
+  }catch{
+    alert("Permite el micrófono para usar el walkie.");
+    return;
+  }
 
   localStream.getAudioTracks().forEach(track=>{
     track.enabled = false;
@@ -540,8 +467,6 @@ talkBtn.addEventListener("pointercancel",e=>{
   e.preventDefault();
   stopTalking();
 });
-
-window.addEventListener("pointerup",()=>stopTalking());
 
 joinBtn.addEventListener("click",joinRoom);
 
