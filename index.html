@@ -753,7 +753,7 @@ async function joinRoom(){
 
   myDeviceId = getDeviceId();
   myRadioId = getRadioId();
-  mySessionId = myRadioId;
+  mySessionId = createSessionId();
 
   try{
     motorolaStart.load();
@@ -921,10 +921,6 @@ talkBtn.addEventListener("pointerup",e=>{
 
 talkBtn.addEventListener("pointercancel",e=>{
   e.preventDefault();
-  stopTalking();
-});
-
-window.addEventListener("pointerup",()=>{
   stopTalking();
 });
 
