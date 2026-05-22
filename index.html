@@ -47,6 +47,15 @@ button{background:#2ecc71;color:white;font-weight:bold}
   color:#00ff88!important;
   text-shadow:0 0 14px #00ff88;
 }
+
+const connectedRef = ref(db, '.info/connected')
+onValue(connectedRef, (snap) => {
+  if (snap.val() === true) {
+    document.getElementById("status").innerText = "🟢CONECTADO";
+  } else {
+    document.getElementById("status".innerText = "🔴RECONECTANDO...";
+  }
+});
 </style>
 </head>
 
@@ -341,7 +350,14 @@ async function joinRoom(){
 
   try{
     localStream = await navigator.mediaDevices.getUserMedia({
-      audio:true,
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 44100
+      },
+      video: false
+    });
       video:false
     });
   }catch{
@@ -352,6 +368,28 @@ async function joinRoom(){
   localStream.getAudioTracks().forEach(track=>{
     track.enabled = false;
   });
+  function initAudioMeter(stream) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray =new Uint8Array(bufferLength);
+
+  function draw () {
+    requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for(let i = 0; i < bufferLength; i++) sum += dataArray[i];
+    let average = sum / bufferLength;
+
+    if (isTalking) {
+      talkBtn.style.transform = `scale(${1 + (average / 250)})`;
+    } else {
+      talkBtn.style.transform = 'scale(1)';
+                    
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("radioBox").style.display = "flex";
@@ -424,6 +462,9 @@ async function joinRoom(){
 }
 
 function startTalking(){
+  if (navigator.vibrate) {
+    navigator.vibrate(50);
+  }
   if(isTalking || !localStream) return;
   isTalking = true;
 
