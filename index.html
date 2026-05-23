@@ -519,22 +519,6 @@ async function joinRoom(){
 },1500);
     return;
   }
-  async function requestNotifications(){
-  if(!("Notification" in window)){
-    alert("Tu navegador no soporta notificaciones.");
-    return;
-  }
-
-  const permission = await Notification.requestPermission();
-
-  if(permission === "granted"){
-    notificationsEnabled = true;
-    notifyBtn.classList.add("active");
-    alert("Notificaciones activadas");
-  }else{
-    alert("No se permitieron las notificaciones");
-  }
-}
 
 async function shareRoom(){
   const url = `${location.origin}${location.pathname}?sala=${encodeURIComponent(room || document.getElementById("roomInput").value)}`;
