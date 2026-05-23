@@ -208,7 +208,7 @@ h1{
     <div class="panel">
   <div class="actionGrid">
     <button class="actionBtn" id="inviteBtn">📩 INVITAR</button>
-    <button class="actionBtn" id="notifyBtn">🔔 NOTIFICAR</button>
+    <button class="actionBtn" onclick="testNotify()">🔔 NOTIFICAR</button>
   </div>
 </div>
 
@@ -760,6 +760,9 @@ let notificationsEnabled = false;
 
 inviteBtn.addEventListener("click", shareRoom);
 notifyBtn.addEventListener("click", requestNotifications);
+window.testNotify = function(){
+  alert("Botón NOTIFICAR sí está funcionando");
+};
   
 </script>
 
