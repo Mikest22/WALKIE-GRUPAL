@@ -208,7 +208,9 @@ h1{
     <div class="panel">
   <div class="actionGrid">
     <button class="actionBtn" id="inviteBtn">📩 INVITAR</button>
-    <button class="actionBtn" onclick="alert('Sí funciona el botón')">🔔 NOTIFICAR</button>
+  <button class="actionBtn" onclick="enableNotifications()">
+  🔔 NOTIFICAR
+</button>
   </div>
 </div>
 
@@ -763,7 +765,37 @@ notifyBtn.addEventListener("click", requestNotifications);
 window.testNotify = function(){
   alert("Botón NOTIFICAR sí está funcionando");
 };
-  
+let notificationsEnabled = false;
+
+async function enableNotifications(){
+
+  if(!("Notification" in window)){
+    alert("Tu navegador no soporta notificaciones");
+    return;
+  }
+
+  const permission =
+    await Notification.requestPermission();
+
+  if(permission === "granted"){
+
+    notificationsEnabled = true;
+
+    new Notification(
+      "Walkie Pro",
+      {
+        body:"Notificaciones activadas 🔔"
+      }
+    );
+
+    alert("Notificaciones activadas");
+
+  }else{
+
+    alert("Permiso denegado");
+
+  }
+}
 </script>
 
 </body>
