@@ -379,13 +379,10 @@ async function joinRoom(){
   myDeviceId = getDeviceId();
   myPeerId = getPeerId();
 
-  try{
-    motorolaStart.load();
-    motorolaEnd.load();
-  }catch{}
-
   // Captura de audio optimizada contra ECO y RUIDO
-  try{
+  // Reemplaza el bloque de navigator.mediaDevices.getUserMedia por este:
+  try {
+    // Primero intentamos con la configuración optimizada
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
@@ -394,6 +391,26 @@ async function joinRoom(){
       },
       video: false
     });
+  } catch (initialError) {
+    console.warn("Fallo el audio optimizado, intentando audio básico...", initialError);
+    try {
+      // Si el celular se pone estricto, intentamos con audio básico sin filtros
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    } catch (fallbackError) {
+      console.error("Permiso denegado totalmente:", fallbackError);
+      alert("Para usar el Walkie necesitas ir a los ajustes de tu navegador y permitir el acceso al micrófono.");
+      return;
+    }
+  }
+
+  // Si logramos obtener el stream, activamos el vúmetro de forma segura
+  if (localStream) {
+    try {
+      initAudioMeter(localStream);
+    } catch(e) {
+      console.error("El vúmetro no es compatible con este navegador:", e);
+    }
+  }
     
     // Inicializar vúmetro
     initAudioMeter(localStream);
