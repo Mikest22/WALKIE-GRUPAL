@@ -227,6 +227,7 @@ motorolaEnd.preload = "auto";
 motorolaStart.volume = 1;
 motorolaEnd.volume = 1;
 
+let joinedOnce = false;
 let room = "";
 let myName = "";
 let myPeerId = "";
@@ -460,6 +461,9 @@ async function joinRoom(){
 
   if(!myName || !room){
     alert("Completa los datos");
+  setTimeout(()=>{
+  joinedOnce = true;
+},1500);
     return;
   }
   async function requestNotifications(){
@@ -546,7 +550,8 @@ ${url}`;
   onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
     const user = snap.val();
     const remoteId = snap.key;
-
+    const alreadyExists = users[remoteId];
+  
     users[remoteId] = user;
     renderUsers();
 
