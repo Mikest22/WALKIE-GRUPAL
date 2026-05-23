@@ -37,123 +37,9 @@ button{background:#2ecc71;color:white;font-weight:bold}
 #floatingSpeaker{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#00ff88;padding:12px 22px;border-radius:999px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 24px rgba(0,255,136,.75)}
 #radioBox{display:flex;flex-direction:column;justify-content:space-evenly;height:100%}
 @media(max-height:760px){h1{font-size:40px}.panel{padding:9px;margin:4px 0}.iconBox{width:46px;height:46px;min-width:46px;font-size:24px}.value{font-size:18px}.idValue{font-size:14px}.wave{height:28px}#talkBtn{width:150px;height:150px}#talkMain{font-size:28px}#talkSub{font-size:12px}#status{font-size:28px}}
-.actionGrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.actionBtn{
-  width:100%;
-  padding:13px;
-  border-radius:16px;
-  background:rgba(0,180,255,.16);
-  border:1px solid rgba(0,220,255,.28);
-  color:white;
-  font-weight:bold;
-  font-size:15px;
-}
-
-#notifyBtn.active{
-  background:rgba(0,255,136,.18);
-  border-color:rgba(0,255,136,.55);
-  color:#00ff88;
-}
-
 </style>
 </head>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>Walkie Pro</title>
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
-html,body{width:100%;height:100dvh;overflow:hidden;font-family:Arial,sans-serif;background:#020812;color:white}
-body{display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at top,#063a55 0%,transparent 35%),radial-gradient(circle at bottom,#001f1e 0%,#020812 75%)}
-.card{
-  width:100vw;
-  height:100dvh;
-  max-width:430px;
-  padding:calc(4px + env(safe-area-inset-top)) 16px calc(4px + env(safe-area-inset-bottom));
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-
-h1{
-  font-size:38px;
-}
-
-.panel{
-  padding:8px;
-  margin:3px 0;
-}
-
-.iconBox{
-  width:44px;
-  height:44px;
-  min-width:44px;
-  font-size:23px;
-}
-
-.label{
-  font-size:13px;
-}
-
-.value{
-  font-size:17px;
-}
-
-.idValue{
-  font-size:13px;
-  padding:6px 8px;
-}
-
-.actionBtn{
-  padding:9px;
-  font-size:13px;
-  margin-top:0;
-}
-
-.wave{
-  height:24px;
-}
-
-#talkBtn{
-  width:138px;
-  height:138px;
-  margin:2px auto;
-}
-
-#talkMain{
-  font-size:25px;
-}
-
-#talkSub{
-  font-size:11px;
-}
-
-#status{
-  font-size:25px;
-}
-
-#usersBox{
-  max-height:48px;
-}
-
-.user{
-  padding:6px;
-  font-size:13px;
-}
-#floatingSpeaker{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);color:#00ff88;padding:12px 22px;border-radius:999px;font-weight:bold;z-index:9999;display:none;box-shadow:0 0 24px rgba(0,255,136,.75)}
-#radioBox{display:flex;flex-direction:column;justify-content:space-evenly;height:100%}
-@media(max-height:760px){h1{font-size:40px}.panel{padding:9px;margin:4px 0}.iconBox{width:46px;height:46px;min-width:46px;font-size:24px}.value{font-size:18px}.idValue{font-size:14px}.wave{height:28px}#talkBtn{width:150px;height:150px}#talkMain{font-size:28px}#talkSub{font-size:12px}#status{font-size:28px}}
-</style>
-</head> 
 <body>
 
 <div id="floatingSpeaker"></div>
@@ -205,14 +91,6 @@ h1{
         <div class="value" id="myIdLabel"></div>
       </div>
     </div>
-    <div class="panel">
-  <div class="actionGrid">
-    <button class="actionBtn" id="inviteBtn">📩 INVITAR</button>
-  <button class="actionBtn" onclick="enableNotifications()">
-  🔔 NOTIFICAR
-</button>
-  </div>
-</div>
 
     <div class="wave"></div>
 
@@ -280,7 +158,6 @@ motorolaEnd.preload = "auto";
 motorolaStart.volume = 1;
 motorolaEnd.volume = 1;
 
-let joinedOnce = false;
 let room = "";
 let myName = "";
 let myPeerId = "";
@@ -514,30 +391,8 @@ async function joinRoom(){
 
   if(!myName || !room){
     alert("Completa los datos");
-  setTimeout(()=>{
-  joinedOnce = true;
-},1500);
     return;
   }
-
-async function shareRoom(){
-  const url = `${location.origin}${location.pathname}?sala=${encodeURIComponent(room || document.getElementById("roomInput").value)}`;
-
-  const text = `Únete a mi sala Walkie Pro 📻
-Sala: ${room || document.getElementById("roomInput").value}
-
-${url}`;
-
-  if(navigator.share){
-    await navigator.share({
-      title:"Walkie Pro",
-      text
-    });
-  }else{
-    await navigator.clipboard.writeText(text);
-    alert("Invitación copiada");
-  }
-}
 
   localStorage.setItem("walkie_name", myName);
   localStorage.setItem("walkie_room", room);
@@ -587,8 +442,7 @@ ${url}`;
   onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
     const user = snap.val();
     const remoteId = snap.key;
-    const alreadyExists = users[remoteId];
-  
+
     users[remoteId] = user;
     renderUsers();
 
@@ -646,9 +500,6 @@ ${url}`;
 }
 
 function startTalking(){
-  if(navigator.vibrate){
-  navigator.vibrate(60);
-}
   if(isTalking || !localStream) return;
 
   isTalking = true;
@@ -675,9 +526,6 @@ function startTalking(){
 }
 
 function stopTalking(){
-  if(navigator.vibrate){
-  navigator.vibrate(40);
-}
   if(!isTalking || !localStream) return;
 
   isTalking = false;
@@ -740,46 +588,6 @@ window.addEventListener("beforeunload",()=>{
     remove(ref(db, `rooms/${room}/peers/${myPeerId}`));
   }
 });
-const inviteBtn = document.getElementById("inviteBtn");
-const notifyBtn = document.getElementById("notifyBtn");
-let notificationsEnabled = false;
-
-inviteBtn.addEventListener("click", shareRoom);
-notifyBtn.addEventListener("click", requestNotifications);
-window.testNotify = function(){
-  alert("Botón NOTIFICAR sí está funcionando");
-};
-let notificationsEnabled = false;
-
-async function enableNotifications(){
-
-  if(!("Notification" in window)){
-    alert("Tu navegador no soporta notificaciones");
-    return;
-  }
-
-  const permission =
-    await Notification.requestPermission();
-
-  if(permission === "granted"){
-
-    notificationsEnabled = true;
-
-    new Notification(
-      "Walkie Pro",
-      {
-        body:"Notificaciones activadas 🔔"
-      }
-    );
-
-    alert("Notificaciones activadas");
-
-  }else{
-
-    alert("Permiso denegado");
-
-  }
-}
 </script>
 
 </body>
