@@ -169,7 +169,7 @@ let pcs = {};
 let users = {};
 let isTalking = false;
 let lastSpeakerId = null;
-let currentSpeakerId = null;
+let audioContext = null; // Guardará el contexto de audio para el vúmetro
 
 const joinBtn = document.getElementById("joinBtn");
 const talkBtn = document.getElementById("talkBtn");
@@ -260,17 +260,19 @@ function makePC(remoteId){
     ]
   });
 
-  localStream.getTracks().forEach(track=>{
-    pc.addTrack(track, localStream);
-  });
+  if(localStream){
+    localStream.getTracks().forEach(track=>{
+      pc.addTrack(track, localStream);
+    });
+  }
 
   pc.ontrack = e=>{
-    createAudio(remoteId, e.streams[0]);
+    createAudio(remoteId, e.streams);
   };
 
   pc.onicecandidate = e=>{
     if(e.candidate){
-      push(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`), e.candidate.toJSON());
+      push(ref(db, rooms/${room}/signals/${remoteId}/${myPeerId}/candidates), e.candidate.toJSON());
     }
   };
 
@@ -280,7 +282,7 @@ function makePC(remoteId){
 }
 
 function listenSignals(remoteId, pc){
-  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/offer`), async snap=>{
+  onValue(ref(db, rooms/${room}/signals/${myPeerId}/${remoteId}/offer), async snap=>{
     const offer = snap.val();
     if(!offer) return;
 
@@ -289,7 +291,7 @@ function listenSignals(remoteId, pc){
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
-      await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/answer`), {
+      await set(ref(db, rooms/${room}/signals/${remoteId}/${myPeerId}/answer), {
         type: answer.type,
         sdp: answer.sdp,
         time: Date.now()
@@ -297,7 +299,7 @@ function listenSignals(remoteId, pc){
     }
   });
 
-  onValue(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/answer`), async snap=>{
+  onValue(ref(db, rooms/${room}/signals/${myPeerId}/${remoteId}/answer), async snap=>{
     const answer = snap.val();
     if(!answer) return;
 
@@ -306,7 +308,7 @@ function listenSignals(remoteId, pc){
     }
   });
 
-  onChildAdded(ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`), async snap=>{
+  onChildAdded(ref(db, rooms/${room}/signals/${myPeerId}/${remoteId}/candidates), async snap=>{
     const candidate = snap.val();
     if(candidate){
       try{
@@ -321,11 +323,45 @@ async function callPeer(remoteId){
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
 
-  await set(ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/offer`), {
+  await set(ref(db, rooms/${room}/signals/${remoteId}/${myPeerId}/offer), {
     type: offer.type,
     sdp: offer.sdp,
     time: Date.now()
   });
+}
+
+// NUEVA FUNCIÓN: Vúmetro seguro
+function initAudioMeter(stream) {
+  try {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function draw() {
+      requestAnimationFrame(draw);
+      if (!isTalking) {
+        talkBtn.style.transform = 'scale(1)';
+        return;
+      }
+      analyser.getByteFrequencyData(dataArray);
+      let sum = 0;
+      for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+      let average = sum / bufferLength;
+      
+      // Hace que el botón pulse según tu voz
+      talkBtn.style.transform = scale(${1 + (average / 300)});
+    }
+    draw();
+  } catch(e) {
+    console.error("Error en vúmetro:", e);
+  }
 }
 
 async function joinRoom(){
@@ -348,42 +384,21 @@ async function joinRoom(){
     motorolaEnd.load();
   }catch{}
 
+  // Captura de audio optimizada contra ECO y RUIDO
   try{
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        autoGainControl: true,
-      }
-      video:false
+        autoGainControl: true
+      },
+      video: false
     });
-    function initAudioMeter(stream) {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    source.connect(analyser);
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray =new Uint8Array(bufferLength);
-
-  function draw () {
-    requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(dataArray);
-    let sum = 0;
-    for(let i = 0; i < bufferLength; i++) sum += dataArray[i];
-    let average = sum / bufferLength;
-
-    if (isTalking) {
-      talkBtn.style.transform = `scale(${1 + (average / 250)})`;
-    } else {
-      talkBtn.style.transform = 'scale(1)';
-    }
-  }
-    draw();
-  }
-  
-  catch{
+    
+    // Inicializar vúmetro
+    initAudioMeter(localStream);
+  }catch(e){
+    console.error(e);
     alert("Permite el micrófono para usar el walkie.");
     return;
   }
@@ -391,9 +406,6 @@ async function joinRoom(){
   localStream.getAudioTracks().forEach(track=>{
     track.enabled = false;
   });
-
-      talkBtn.style.transform = 'scale(1)';
-                    
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("radioBox").style.display = "flex";
@@ -403,7 +415,18 @@ async function joinRoom(){
   document.getElementById("deviceIdLabel").innerText = myDeviceId;
   document.getElementById("myIdLabel").innerText = myPeerId;
 
-  const myRef = ref(db, `rooms/${room}/peers/${myPeerId}`);
+  // Escuchar estado real de conexión Firebase
+  const connectedRef = ref(db, '.info/connected');
+  onValue(connectedRef, (snap) => {
+    const statusDiv = document.getElementById("status");
+    if (snap.val() === true) {
+      statusDiv.innerText = "🟢 CONECTADO";
+    } else {
+      statusDiv.innerText = "🔴 RECONECTANDO...";
+    }
+  });
+
+  const myRef = ref(db, rooms/${room}/peers/${myPeerId});
   await set(myRef, {
     id: myPeerId,
     name: myName,
@@ -412,9 +435,9 @@ async function joinRoom(){
   });
 
   onDisconnect(myRef).remove();
-  onDisconnect(ref(db, `rooms/${room}/signals/${myPeerId}`)).remove();
+  onDisconnect(ref(db, rooms/${room}/signals/${myPeerId})).remove();
 
-  onChildAdded(ref(db, `rooms/${room}/peers`), async snap=>{
+  onChildAdded(ref(db, rooms/${room}/peers), async snap=>{
     const user = snap.val();
     const remoteId = snap.key;
 
@@ -430,7 +453,7 @@ async function joinRoom(){
     }
   });
 
-  onChildRemoved(ref(db, `rooms/${room}/peers`), snap=>{
+  onChildRemoved(ref(db, rooms/${room}/peers), snap=>{
     const remoteId = snap.key;
     delete users[remoteId];
     renderUsers();
@@ -444,7 +467,7 @@ async function joinRoom(){
     if(audio) audio.remove();
   });
 
-  onValue(ref(db, `rooms/${room}/speaking`), snap=>{
+  onValue(ref(db, rooms/${room}/speaking), snap=>{
     const data = snap.val();
 
     if(data && data.id !== myPeerId){
@@ -466,13 +489,18 @@ async function joinRoom(){
 }
 
 function startTalking(){
-  if (navigator.vibrate) {
-    navigator.vibrate(50);
-  }
   if(isTalking || !localStream) return;
   isTalking = true;
 
+  // Vibración táctil si está en celular
+  if(navigator.vibrate) navigator.vibrate(60);
+
   playSound("start");
+
+  // Activar AudioContext si estaba suspendido (seguridad del navegador)
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
 
   localStream.getAudioTracks().forEach(track=>{
     track.enabled = true;
@@ -483,7 +511,7 @@ function startTalking(){
   talkSub.style.display = "none";
   showSpeaker(myName);
 
-  set(ref(db, `rooms/${room}/speaking`), {
+  set(ref(db, rooms/${room}/speaking), {
     id: myPeerId,
     name: myName,
     time: Date.now()
@@ -505,7 +533,7 @@ function stopTalking(){
   talkSub.style.display = "block";
   hideSpeaker();
 
-  remove(ref(db, `rooms/${room}/speaking`));
+  remove(ref(db, rooms/${room}/speaking));
 }
 
 talkBtn.addEventListener("pointerdown",e=>{
@@ -537,10 +565,10 @@ window.addEventListener("load",()=>{
 
 window.addEventListener("beforeunload",()=>{
   if(room && myPeerId){
-    remove(ref(db, `rooms/${room}/peers/${myPeerId}`));
+    remove(ref(db, rooms/${room}/peers/${myPeerId}));
   }
 });
 </script>
 
 </body>
-</html> 
+</html>
