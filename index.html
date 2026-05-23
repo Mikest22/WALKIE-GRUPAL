@@ -365,6 +365,9 @@ function initAudioMeter(stream) {
 }
 
 async function joinRoom(){
+  try {
+    alert("¡El boton funciona! Iniciando proceso...");
+    
   myName = document.getElementById("nameInput").value.trim();
   room = document.getElementById("roomInput").value.trim();
 
@@ -387,51 +390,31 @@ async function joinRoom(){
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
-        autoGainControl: true
-      },
+        autoGainControl: true },
       video: false
     });
-  } catch (initialError) {
+  } catch (e) {
     console.warn("Fallo el audio optimizado, intentando audio básico...", initialError);
     try {
       // Si el celular se pone estricto, intentamos con audio básico sin filtros
       localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    } catch (fallbackError) {
-      console.error("Permiso denegado totalmente:", fallbackError);
-      alert("Para usar el Walkie necesitas ir a los ajustes de tu navegador y permitir el acceso al micrófono.");
-      return;
-    }
-  }
-
-  // Si logramos obtener el stream, activamos el vúmetro de forma segura
+    } 
   if (localStream) {
     try {
       initAudioMeter(localStream);
     } catch(e) {
-      console.error("El vúmetro no es compatible con este navegador:", e);
+    localStream.getAudioTracks().forEach(track=>{ track.enabled = false; });
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("radioBox").style.display = "flex";
+
+    document.getElementById("roomLabel").innerText = room;
+    document.getElementById("nameLabel").innerText = myName;
+    document.getElementById("deviceIdLabel").innerText = myDeviceId;
+    document.getElementById("myIdLabel").innerText = myPeerId;
+    
     }
   }
-    
-    // Inicializar vúmetro
-    initAudioMeter(localStream);
-  }catch(e){
-    console.error(e);
-    alert("Permite el micrófono para usar el walkie.");
-    return;
-  }
-
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled = false;
-  });
-
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("radioBox").style.display = "flex";
-
-  document.getElementById("roomLabel").innerText = room;
-  document.getElementById("nameLabel").innerText = myName;
-  document.getElementById("deviceIdLabel").innerText = myDeviceId;
-  document.getElementById("myIdLabel").innerText = myPeerId;
-
   // Escuchar estado real de conexión Firebase
   const connectedRef = ref(db, '.info/connected');
   onValue(connectedRef, (snap) => {
