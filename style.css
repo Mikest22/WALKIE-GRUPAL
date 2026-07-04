@@ -263,52 +263,46 @@ button{
   height:100%;
 }
 
-.users-screen{
+#usersScreen{
   position:fixed;
   inset:0;
-  background:radial-gradient(circle at top,#063a55 0%,#020812 65%);
-  z-index:999999;
-  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
-  overflow:auto;
+  width:100vw;
+  height:100dvh;
+  background:linear-gradient(180deg,#052b3a,#020812);
+  z-index:9999;
+  padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
+  overflow-y:auto;
 }
 
-.users-header{
+.usersScreen.hidden{
+  display:none!important;
+}
+
+.usersHeader{
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  margin-bottom:15px;
+  align-items:center;
+  margin-bottom:20px;
 }
 
-.users-header h2{
+.usersHeader h2{
+  font-size:36px;
   color:#42dcff;
-  font-size:30px;
 }
 
 #closeUsersScreen{
   width:auto;
-  padding:10px 16px;
-  background:#ff4f5e;
-}
-
-.user-card{
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(0,220,255,.25);
+  padding:14px 22px;
+  background:#ff4f67;
+  color:white;
   border-radius:18px;
-  padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 0 14px rgba(0,200,255,.12);
+  font-weight:bold;
 }
 
-.user-card.speaking-card{
-  border:2px solid #00ff88;
-  box-shadow:0 0 22px rgba(0,255,136,.75);
-}
-
-@media(max-height:720px){
-  h1{font-size:30px;}
-  .panel{padding:5px;margin:1px 0;}
-  #talkBtn{width:118px;height:118px;}
-  #talkMain{font-size:21px;}
-  #status{font-size:20px;}
-  .wave{height:14px;}
+.card{
+  width:100vw;
+  height:100dvh;
+  max-width:430px;
+  margin:0 auto;
+  overflow:hidden;
 }
