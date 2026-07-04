@@ -1,0 +1,314 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+html,body{
+  width:100%;
+  height:100dvh;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+  background:#020812;
+  color:white;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  touch-action:manipulation;
+  background:
+    radial-gradient(circle at top,#063a55 0%,transparent 35%),
+    radial-gradient(circle at bottom,#001f1e 0%,#020812 75%);
+}
+
+.hidden{display:none!important;}
+.wide{width:100%;}
+.yellow{color:#ffc247!important;}
+
+.card{
+  width:100vw;
+  height:100dvh;
+  max-width:430px;
+  padding:calc(2px + env(safe-area-inset-top)) 14px calc(2px + env(safe-area-inset-bottom));
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:
+    radial-gradient(circle at 50% 45%,rgba(0,190,255,.11),transparent 32%),
+    linear-gradient(180deg,rgba(2,25,38,.98),rgba(0,15,22,.98));
+}
+
+h1{
+  text-align:center;
+  font-size:34px;
+  line-height:1;
+  font-family:Impact,Arial Black,sans-serif;
+  color:#ffe0ad;
+  text-shadow:0 0 16px rgba(255,185,90,.9),4px 4px 0 rgba(18,9,35,.95);
+}
+
+.panel{
+  border:1px solid rgba(0,220,255,.48);
+  border-radius:18px;
+  background:rgba(0,25,35,.72);
+  box-shadow:inset 0 0 20px rgba(0,210,255,.08),0 0 12px rgba(0,200,255,.08);
+  padding:6px;
+  margin:2px 0;
+}
+
+.login-panel{padding:10px;}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.info-item,.full-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+}
+
+.icon-box{
+  min-width:40px;
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px;
+  background:rgba(0,180,255,.12);
+  border:1px solid rgba(0,220,255,.22);
+  box-shadow:inset 0 0 18px rgba(0,220,255,.08);
+}
+
+.label{
+  color:#42dcff;
+  font-weight:bold;
+  font-size:13px;
+  margin-bottom:3px;
+}
+
+.value{
+  color:#fff;
+  font-weight:bold;
+  font-size:16px;
+}
+
+.id-value{
+  color:#e6fbff;
+  font-size:12px;
+  word-break:break-word;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:5px 7px;
+  margin-top:3px;
+}
+
+input,button{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:12px;
+  font-size:17px;
+  margin-top:8px;
+}
+
+input{
+  background:rgba(255,255,255,.12);
+  color:white;
+  text-align:center;
+  border:1px solid rgba(0,220,255,.3);
+  user-select:text;
+  -webkit-user-select:text;
+}
+
+button{
+  background:#2ecc71;
+  color:white;
+  font-weight:bold;
+}
+
+.wave{
+  height:18px;
+  opacity:.85;
+  background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,255,220,.8) 14px 18px,transparent 18px 28px);
+  filter:drop-shadow(0 0 8px rgba(0,255,220,.35));
+}
+
+#talkBtn{
+  width:128px;
+  height:128px;
+  margin:2px auto;
+  border-radius:50%;
+  border:4px solid #ff9a37;
+  color:white;
+  background:radial-gradient(circle at center,#172431 0%,#081018 58%,#02060a 100%);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 0 20px rgba(255,140,40,.95),0 0 48px rgba(255,115,20,.45),inset 0 0 35px rgba(255,255,255,.07);
+  touch-action:none;
+  position:relative;
+}
+
+#talkBtn *{
+  pointer-events:none;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  -webkit-touch-callout:none!important;
+}
+
+.transmitting{
+  border:4px solid #00ff88!important;
+  box-shadow:0 0 20px #00ff88,0 0 45px rgba(0,255,136,.75),inset 0 0 25px rgba(0,255,136,.3)!important;
+}
+
+.transmitting #talkMain{
+  color:#00ff88!important;
+  text-shadow:0 0 14px rgba(0,255,136,.95);
+}
+
+#talkMain{
+  font-size:23px;
+  font-weight:bold;
+  color:white;
+}
+
+#talkSub{
+  font-size:10px;
+  margin-top:5px;
+  color:#ffd18a;
+}
+
+.status-panel{border-color:rgba(0,255,100,.55);}
+
+#status{
+  font-size:22px;
+  color:#00ff66;
+  font-weight:bold;
+  text-align:center;
+  text-shadow:0 0 10px rgba(0,255,102,.85),0 0 22px rgba(0,255,102,.45);
+}
+
+.user-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+}
+
+.user-row h3{font-size:19px;}
+#usersCountText{font-size:14px;}
+
+.user{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:5px;
+  margin-top:4px;
+  color:white;
+  text-align:left;
+  font-size:12px;
+}
+
+.user.speaking-user{
+  border-color:#00ff88;
+  box-shadow:0 0 18px rgba(0,255,136,.8);
+  color:#00ff88;
+}
+
+#usersBox{
+  max-height:48px;
+  overflow:hidden;
+}
+
+.arrow{font-size:34px;}
+
+.floating,.join-toast{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.88);
+  color:#00ff88;
+  padding:12px 22px;
+  border-radius:999px;
+  font-weight:bold;
+  z-index:99999;
+  box-shadow:0 0 24px rgba(0,255,136,.75);
+  pointer-events:none;
+  max-width:92vw;
+  text-align:center;
+}
+
+.floating{top:18px;}
+.join-toast{bottom:20px;border:1px solid rgba(0,255,136,.45);}
+
+.radio-box{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  height:100%;
+}
+
+.users-screen{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at top,#063a55 0%,#020812 65%);
+  z-index:999999;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  overflow:auto;
+}
+
+.users-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+
+.users-header h2{
+  color:#42dcff;
+  font-size:30px;
+}
+
+#closeUsersScreen{
+  width:auto;
+  padding:10px 16px;
+  background:#ff4f5e;
+}
+
+.user-card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(0,220,255,.25);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 0 14px rgba(0,200,255,.12);
+}
+
+.user-card.speaking-card{
+  border:2px solid #00ff88;
+  box-shadow:0 0 22px rgba(0,255,136,.75);
+}
+
+@media(max-height:720px){
+  h1{font-size:30px;}
+  .panel{padding:5px;margin:1px 0;}
+  #talkBtn{width:118px;height:118px;}
+  #talkMain{font-size:21px;}
+  #status{font-size:20px;}
+  .wave{height:14px;}
+}
