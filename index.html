@@ -1,43 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Walkie Pro</title>
-
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./style.css">
 </head>
-
 <body>
-
-  <div id="floatingSpeaker"></div>
-  <div id="joinToast"></div>
+  <div id="floatingSpeaker" class="floating hidden"></div>
+  <div id="joinToast" class="join-toast hidden"></div>
 
   <main class="card">
-
     <h1>📻 Walkie Pro</h1>
 
-    <section id="loginBox">
-      <div class="panel loginPanel">
-        <input id="nameInput" placeholder="Tu nombre" autocomplete="name" />
-        <input id="roomInput" placeholder="Sala" value="radio-mike" />
-        <button id="joinBtn">ENTRAR</button>
+    <section id="loginBox" class="login-box">
+      <div class="panel login-panel">
+        <input id="nameInput" placeholder="Tu nombre" autocomplete="name">
+        <input id="roomInput" placeholder="Sala" value="radio-mike">
+        <button id="joinBtn" type="button">ENTRAR</button>
       </div>
     </section>
 
-    <section id="radioBox" class="hidden">
-
-      <div class="panel infoGrid">
-        <div class="infoItem">
-          <div class="iconBox">🏢</div>
+    <section id="radioBox" class="radio-box hidden">
+      <div class="panel info-grid">
+        <div class="info-item">
+          <div class="icon-box">🏢</div>
           <div>
             <div class="label">Sala:</div>
             <div class="value" id="roomLabel"></div>
           </div>
         </div>
-
-        <div class="infoItem">
-          <div class="iconBox">👤</div>
+        <div class="info-item">
+          <div class="icon-box">👤</div>
           <div>
             <div class="label">Usuario:</div>
             <div class="value" id="nameLabel"></div>
@@ -45,63 +39,59 @@
         </div>
       </div>
 
-      <div class="panel fullItem">
-        <div class="iconBox">📱</div>
+      <div class="panel full-item">
+        <div class="icon-box">📱</div>
         <div class="wide">
           <div class="label">ID dispositivo:</div>
-          <div class="idValue" id="deviceIdLabel"></div>
+          <div class="id-value" id="deviceIdLabel"></div>
         </div>
       </div>
 
-      <div class="panel fullItem">
-        <div class="iconBox">📡</div>
-        <div>
+      <div class="panel full-item">
+        <div class="icon-box">📡</div>
+        <div class="wide">
           <div class="label yellow">ID Radio:</div>
           <div class="value" id="myIdLabel"></div>
         </div>
       </div>
 
-      <div class="wave"></div>
+      <div class="wave" aria-hidden="true"></div>
 
-      <div id="talkBtn">
+      <div id="talkBtn" role="button" tabindex="0" aria-label="Mantén presionado para hablar">
         <span id="talkMain">HABLAR</span>
         <span id="talkSub">Esperando transmisión</span>
       </div>
 
-      <div class="panel statusPanel">
+      <div class="panel status-panel">
         <div id="status">🟢 CONECTADO</div>
       </div>
 
-      <div class="panel userRow" id="openUsersPanel">
-        <div class="infoItem">
-          <div class="iconBox">👥</div>
-          <div>
-            <h3>Usuarios conectados</h3>
-            <div id="usersCountText">0 conectados</div>
-            <div id="usersBox"></div>
-          </div>
-        </div>
-        <div class="arrow">›</div>
-      </div>
-
+      <button class="panel user-row" id="openUsersPanel" type="button">
+        <span class="info-item">
+          <span class="icon-box">👥</span>
+          <span>
+            <span class="users-title">Usuarios conectados</span>
+            <span id="usersCountText">0 conectados</span>
+            <span id="usersBox"></span>
+          </span>
+        </span>
+        <span class="arrow">›</span>
+      </button>
     </section>
-
   </main>
 
-  <section id="usersScreen" class="hidden">
-    <div class="usersHeader">
+  <section id="usersScreen" class="users-screen hidden" aria-label="Usuarios conectados">
+    <div class="users-header">
       <h2>👥 Usuarios</h2>
-      <button id="closeUsersScreen">VOLVER</button>
+      <button id="closeUsersScreen" type="button">VOLVER</button>
     </div>
-
     <div id="usersListScreen"></div>
   </section>
 
-  <audio id="startSound" src="./sounds/start.mp3" preload="auto"></audio>
-  <audio id="endSound" src="./sounds/end.mp3" preload="auto"></audio>
-  <audio id="joinSound" src="./sounds/join.mp3" preload="auto"></audio>
+  <audio id="startSound" src="./motorola-start.mp3" preload="auto"></audio>
+  <audio id="endSound" src="./motorola-end.mp3" preload="auto"></audio>
+  <audio id="joinSound" src="./motorola-start.mp3" preload="auto"></audio>
 
   <script type="module" src="./app.js"></script>
-
 </body>
 </html>
