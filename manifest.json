@@ -1,0 +1,11 @@
+{
+  "name": "Walkie Pro",
+  "short_name": "Walkie Pro",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#020812",
+  "theme_color": "#020812",
+  "orientation": "portrait",
+  "icons": []
+}
