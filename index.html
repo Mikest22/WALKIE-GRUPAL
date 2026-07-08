@@ -628,9 +628,29 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const iceServers = [
-  { urls: "stun:stun.l.google.com:19302" },
-  { urls: "stun:stun1.l.google.com:19302" },
-  { urls: "stun:stun2.l.google.com:19302" }
+  {
+    urls: "stun:stun.relay.metered.ca:80"
+  },
+  {
+    urls: "turn:global.relay.metered.ca:80",
+    username: "79fe533b1ad2918067c91f5d",
+    credential: "3XZ/A9B0K7McPMLB"
+  },
+  {
+    urls: "turn:global.relay.metered.ca:80?transport=tcp",
+    username: "79fe533b1ad2918067c91f5d",
+    credential: "3XZ/A9B0K7McPMLB"
+  },
+  {
+    urls: "turn:global.relay.metered.ca:443",
+    username: "79fe533b1ad2918067c91f5d",
+    credential: "3XZ/A9B0K7McPMLB"
+  },
+  {
+    urls: "turns:global.relay.metered.ca:443?transport=tcp",
+    username: "79fe533b1ad2918067c91f5d",
+    credential: "3XZ/A9B0K7McPMLB"
+  }
 ];
 
 let room = "";
@@ -920,7 +940,10 @@ async function applyPending(remoteId, pc){
 function makePC(remoteId){
   if(pcs[remoteId]) return pcs[remoteId];
 
-  const pc = new RTCPeerConnection({ iceServers });
+  const pc = new RTCPeerConnection({
+  iceServers,
+  iceTransportPolicy: "relay"
+});
 
     sendStream.getTracks().forEach(track=>{
     pc.addTrack(track, sendStream);
