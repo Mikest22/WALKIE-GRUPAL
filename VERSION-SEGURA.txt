@@ -1,0 +1,3 @@
+Voy a reconstruir Walkie Pro desde una base limpia.
+No borrar index-respaldo-radio.html.
+La versión estable anterior queda guardada como respaldo.
