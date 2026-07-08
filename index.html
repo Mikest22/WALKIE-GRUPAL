@@ -638,6 +638,9 @@ let myName = "";
 let myPeerId = "";
 let myDeviceId = "";
 let localStream = null;
+let sendStream = null;
+let audioContext = null;
+let micGain = null;
 
 let users = {};
 let pcs = {};
@@ -678,6 +681,41 @@ function playEnd(){
     endSound.volume = 1;
     endSound.play().catch(()=>{});
   }catch{}
+}
+
+async function setupMicAudio(){
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+  const micSource = audioContext.createMediaStreamSource(localStream);
+  micGain = audioContext.createGain();
+  micGain.gain.value = 0;
+
+  const destination = audioContext.createMediaStreamDestination();
+
+  micSource.connect(micGain);
+  micGain.connect(destination);
+
+  sendStream = destination.stream;
+}
+
+async function unlockAudio(){
+  try{
+    if(audioContext && audioContext.state !== "running"){
+      await audioContext.resume();
+    }
+  }catch{}
+
+  resumeRemoteAudio();
+}
+
+function resumeRemoteAudio(){
+  document.querySelectorAll("audio[id^='audio-']").forEach(audio=>{
+    try{
+      audio.muted = false;
+      audio.volume = 1;
+      audio.play().catch(()=>{});
+    }catch{}
+  });
 }
 
 function playJoin(){
