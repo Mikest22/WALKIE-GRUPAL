@@ -922,8 +922,8 @@ function makePC(remoteId){
 
   const pc = new RTCPeerConnection({ iceServers });
 
-  localStream.getTracks().forEach(track=>{
-    pc.addTrack(track, localStream);
+    sendStream.getTracks().forEach(track=>{
+    pc.addTrack(track, sendStream);
   });
 
   pc.ontrack = event=>{
@@ -1100,9 +1100,17 @@ async function joinRoom(){
     return;
   }
 
+    await setupMicAudio();
+
+    await setupMicAudio();
+
   localStream.getAudioTracks().forEach(track=>{
-    track.enabled = false;
+    track.enabled = true;
   });
+
+  await unlockAudio();
+
+  await unlockAudio();
 
   loginBox.classList.add("hidden");
   radioBox.classList.remove("hidden");
@@ -1217,9 +1225,11 @@ function startTalking(){
 
   playStart();
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled = true;
-  });
+    unlockAudio();
+
+  if(micGain){
+    micGain.gain.value = 1;
+  }
 
   talkBtn.classList.add("transmitting");
   talkMain.innerText = "TRANSMITIENDO";
@@ -1245,9 +1255,11 @@ function stopTalking(){
 
   playEnd();
 
-  localStream.getAudioTracks().forEach(track=>{
-    track.enabled = false;
-  });
+    if(micGain){
+    micGain.gain.value = 0;
+  }
+
+  resumeRemoteAudio();
 
   talkBtn.classList.remove("transmitting");
   talkMain.innerText = "HABLAR";
