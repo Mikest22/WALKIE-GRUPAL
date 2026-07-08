@@ -1,97 +1,1293 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>Walkie Pro</title>
-  <link rel="stylesheet" href="./style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Walkie Pro</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+html,body{
+  width:100%;
+  height:100dvh;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+  background:#020812;
+  color:white;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:
+    radial-gradient(circle at top,#063a55 0%,transparent 35%),
+    radial-gradient(circle at bottom,#001f1e 0%,#020812 75%);
+}
+
+.hidden{
+  display:none!important;
+}
+
+.card{
+  width:100vw;
+  height:100dvh;
+  max-width:430px;
+  margin:0 auto;
+  padding:calc(6px + env(safe-area-inset-top)) 16px calc(6px + env(safe-area-inset-bottom));
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(0,190,255,.11),transparent 34%),
+    linear-gradient(180deg,rgba(2,25,38,.98),rgba(0,15,22,.98));
+}
+
+h1{
+  text-align:center;
+  font-size:38px;
+  line-height:1;
+  font-family:Impact,Arial Black,sans-serif;
+  color:#ffe0ad;
+  text-shadow:
+    0 0 16px rgba(255,185,90,.9),
+    4px 4px 0 rgba(18,9,35,.95);
+}
+
+.panel{
+  border:1px solid rgba(0,220,255,.48);
+  border-radius:18px;
+  background:rgba(0,25,35,.72);
+  box-shadow:
+    inset 0 0 20px rgba(0,210,255,.08),
+    0 0 12px rgba(0,200,255,.08);
+  padding:8px;
+  margin:3px 0;
+}
+
+.loginPanel{
+  margin-top:20px;
+}
+
+input,button{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:13px;
+  font-size:18px;
+  margin-top:8px;
+}
+
+input{
+  background:rgba(255,255,255,.12);
+  color:white;
+  text-align:center;
+  border:1px solid rgba(0,220,255,.3);
+  user-select:text;
+  -webkit-user-select:text;
+}
+
+button{
+  background:#2ecc71;
+  color:white;
+  font-weight:bold;
+}
+
+#radioBox{
+  height:calc(100dvh - 58px);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.infoGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.infoItem,.fullItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+}
+
+.iconBox{
+  width:44px;
+  height:44px;
+  min-width:44px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:23px;
+  background:rgba(0,180,255,.12);
+  border:1px solid rgba(0,220,255,.22);
+  box-shadow:inset 0 0 18px rgba(0,220,255,.08);
+}
+
+.label{
+  color:#42dcff;
+  font-weight:bold;
+  font-size:13px;
+  margin-bottom:4px;
+}
+
+.yellow{
+  color:#ffc247;
+}
+
+.value{
+  color:#fff;
+  font-weight:bold;
+  font-size:17px;
+  word-break:break-word;
+}
+
+.idValue{
+  color:#e6fbff;
+  font-size:13px;
+  word-break:break-word;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:6px 8px;
+  margin-top:4px;
+}
+
+.wide{
+  width:100%;
+}
+
+.wave{
+  height:22px;
+  opacity:.85;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 14px,
+      rgba(0,255,220,.8) 14px 18px,
+      transparent 18px 28px
+    );
+  filter:drop-shadow(0 0 8px rgba(0,255,220,.35));
+}
+
+#talkBtn{
+  width:136px;
+  height:136px;
+  margin:3px auto;
+  border-radius:50%;
+  border:4px solid #ff9a37;
+  color:white;
+  background:radial-gradient(circle at center,#172431 0%,#081018 58%,#02060a 100%);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  box-shadow:
+    0 0 20px rgba(255,140,40,.95),
+    0 0 48px rgba(255,115,20,.45),
+    inset 0 0 35px rgba(255,255,255,.07);
+  touch-action:none;
+  position:relative;
+}
+
+#talkBtn *{
+  pointer-events:none;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+  -webkit-touch-callout:none!important;
+}
+
+#talkMain{
+  font-size:25px;
+  font-weight:bold;
+  color:white;
+}
+
+#talkSub{
+  font-size:11px;
+  margin-top:6px;
+  color:#ffd18a;
+}
+
+.transmitting{
+  border:4px solid #00ff88!important;
+  box-shadow:
+    0 0 20px #00ff88,
+    0 0 45px rgba(0,255,136,.75),
+    inset 0 0 25px rgba(0,255,136,.3)!important;
+}
+
+.transmitting #talkMain{
+  color:#00ff88!important;
+  text-shadow:0 0 14px rgba(0,255,136,.95);
+}
+
+.statusPanel{
+  border-color:rgba(0,255,100,.55);
+}
+
+#status{
+  font-size:25px;
+  color:#00ff66;
+  font-weight:bold;
+  text-shadow:
+    0 0 10px rgba(0,255,102,.85),
+    0 0 22px rgba(0,255,102,.45);
+  text-align:center;
+}
+
+.userRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
+}
+
+.userRow h3{
+  font-size:19px;
+}
+
+#usersCountText{
+  font-size:14px;
+}
+
+#usersBox{
+  max-height:45px;
+  overflow:hidden;
+}
+
+.userMini{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:5px 8px;
+  margin-top:5px;
+  color:white;
+  font-size:12px;
+}
+
+.userMini.speakingUser{
+  border-color:#00ff88;
+  color:#00ff88;
+  box-shadow:0 0 12px rgba(0,255,136,.55);
+}
+
+.arrow{
+  font-size:34px;
+  font-weight:bold;
+}
+
+#floatingSpeaker{
+  position:fixed;
+  top:calc(16px + env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.88);
+  color:#00ff88;
+  padding:11px 20px;
+  border-radius:999px;
+  font-weight:bold;
+  z-index:99999;
+  display:none;
+  box-shadow:0 0 24px rgba(0,255,136,.75);
+  max-width:88vw;
+  text-align:center;
+}
+
+#joinToast{
+  position:fixed;
+  top:calc(64px + env(safe-area-inset-top));
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.92);
+  color:#00ff88;
+  padding:12px 18px;
+  border-radius:18px;
+  font-weight:bold;
+  z-index:99999;
+  display:none;
+  box-shadow:0 0 22px rgba(0,255,136,.75);
+  border:1px solid rgba(0,255,136,.45);
+  pointer-events:none;
+  max-width:88vw;
+  text-align:center;
+}
+
+#usersScreen{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  background:
+    radial-gradient(circle at top,#063a55 0%,transparent 35%),
+    linear-gradient(180deg,#052b3a,#020812);
+  z-index:9999;
+  padding:calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
+  overflow-y:auto;
+}
+
+.usersHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.usersHeader h2{
+  color:#42dcff;
+  font-size:36px;
+  font-weight:bold;
+}
+
+#closeUsersScreen{
+  width:auto;
+  padding:13px 22px;
+  border-radius:18px;
+  background:#ff4f67;
+  color:white;
+  font-weight:bold;
+  margin:0;
+}
+
+.userCard{
+  border:1px solid rgba(0,220,255,.45);
+  border-radius:18px;
+  background:rgba(0,25,35,.72);
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:
+    inset 0 0 20px rgba(0,210,255,.08),
+    0 0 12px rgba(0,200,255,.08);
+}
+
+.userTop{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.userNameBig{
+  font-size:22px;
+  font-weight:bold;
+}
+
+.userLineTitle{
+  color:#42dcff;
+  font-weight:bold;
+  margin-top:10px;
+  margin-bottom:5px;
+}
+
+.userLineTitle.yellow{
+  color:#ffc247;
+}
+
+.userBoxValue{
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(0,220,255,.22);
+  border-radius:12px;
+  padding:8px 10px;
+  word-break:break-word;
+}
+
+.userBottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:14px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+.signalGood{
+  color:#00ff66;
+}
+
+.signalMid{
+  color:#ffc247;
+}
+
+.online{
+  color:#00ff66;
+}
+
+.emptyUsers{
+  border:1px solid rgba(0,220,255,.45);
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  padding:18px;
+  text-align:center;
+  font-size:20px;
+}
+
+@media(max-height:760px){
+  .card{
+    padding:calc(4px + env(safe-area-inset-top)) 14px calc(4px + env(safe-area-inset-bottom));
+  }
+
+  h1{
+    font-size:34px;
+  }
+
+  .panel{
+    padding:6px;
+    margin:2px 0;
+  }
+
+  #radioBox{
+    height:calc(100dvh - 50px);
+  }
+
+  .iconBox{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    font-size:21px;
+  }
+
+  .label{
+    font-size:12px;
+  }
+
+  .value{
+    font-size:16px;
+  }
+
+  .idValue{
+    font-size:12px;
+    padding:5px 7px;
+  }
+
+  .wave{
+    height:18px;
+  }
+
+  #talkBtn{
+    width:122px;
+    height:122px;
+  }
+
+  #talkMain{
+    font-size:22px;
+  }
+
+  #talkSub{
+    font-size:10px;
+  }
+
+  #status{
+    font-size:22px;
+  }
+
+  .userRow h3{
+    font-size:18px;
+  }
+
+  #usersCountText{
+    font-size:13px;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div id="floatingSpeaker" class="floating hidden"></div>
-  <div id="joinToast" class="join-toast hidden"></div>
 
-  <main class="card">
-    <h1>📻 Walkie Pro</h1>
+<div id="floatingSpeaker"></div>
+<div id="joinToast"></div>
 
-    <section id="loginBox" class="login-box">
-      <div class="panel login-panel">
-        <input id="nameInput" placeholder="Tu nombre" autocomplete="name">
-        <input id="roomInput" placeholder="Sala" value="radio-mike">
-        <button id="joinBtn" type="button">ENTRAR</button>
-      </div>
-    </section>
+<main class="card">
 
-    <section id="radioBox" class="radio-box hidden">
-      <div class="panel info-grid">
-        <div class="info-item">
-          <div class="icon-box">🏢</div>
-          <div>
-            <div class="label">Sala:</div>
-            <div class="value" id="roomLabel"></div>
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="icon-box">👤</div>
-          <div>
-            <div class="label">Usuario:</div>
-            <div class="value" id="nameLabel"></div>
-          </div>
-        </div>
-      </div>
+  <h1>📻 Walkie Pro</h1>
 
-      <div class="panel full-item">
-        <div class="icon-box">📱</div>
-        <div class="wide">
-          <div class="label">ID dispositivo:</div>
-          <div class="id-value" id="deviceIdLabel"></div>
-        </div>
-      </div>
-
-      <div class="panel full-item">
-        <div class="icon-box">📡</div>
-        <div class="wide">
-          <div class="label yellow">ID Radio:</div>
-          <div class="value" id="myIdLabel"></div>
-        </div>
-      </div>
-
-      <div class="wave" aria-hidden="true"></div>
-
-      <div id="talkBtn" role="button" tabindex="0" aria-label="Mantén presionado para hablar">
-        <span id="talkMain">HABLAR</span>
-        <span id="talkSub">Esperando transmisión</span>
-      </div>
-
-      <div class="panel status-panel">
-        <div id="status">🟢 CONECTADO</div>
-      </div>
-
-      <button class="panel user-row" id="openUsersPanel" type="button">
-        <span class="info-item">
-          <span class="icon-box">👥</span>
-          <span>
-            <span class="users-title">Usuarios conectados</span>
-            <span id="usersCountText">0 conectados</span>
-            <span id="usersBox"></span>
-          </span>
-        </span>
-        <span class="arrow">›</span>
-      </button>
-    </section>
-  </main>
-
-  <section id="usersScreen" class="users-screen hidden" aria-label="Usuarios conectados">
-    <div class="users-header">
-      <h2>👥 Usuarios</h2>
-      <button id="closeUsersScreen" type="button">VOLVER</button>
+  <section id="loginBox">
+    <div class="panel loginPanel">
+      <input id="nameInput" placeholder="Tu nombre" autocomplete="name">
+      <input id="roomInput" placeholder="Sala" value="radio-mike">
+      <button id="joinBtn">ENTRAR</button>
     </div>
-    <div id="usersListScreen"></div>
   </section>
 
-  <audio id="startSound" src="./motorola-start.mp3" preload="auto"></audio>
-  <audio id="endSound" src="./motorola-end.mp3" preload="auto"></audio>
-  <audio id="joinSound" src="./motorola-start.mp3" preload="auto"></audio>
+  <section id="radioBox" class="hidden">
 
-  <script type="module" src="./app.js"></script>
+    <div class="panel infoGrid">
+      <div class="infoItem">
+        <div class="iconBox">🏢</div>
+        <div>
+          <div class="label">Sala:</div>
+          <div class="value" id="roomLabel"></div>
+        </div>
+      </div>
+
+      <div class="infoItem">
+        <div class="iconBox">👤</div>
+        <div>
+          <div class="label">Usuario:</div>
+          <div class="value" id="nameLabel"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox">📱</div>
+      <div class="wide">
+        <div class="label">ID dispositivo:</div>
+        <div class="idValue" id="deviceIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="panel fullItem">
+      <div class="iconBox">📡</div>
+      <div class="wide">
+        <div class="label yellow">ID Radio:</div>
+        <div class="value" id="myIdLabel"></div>
+      </div>
+    </div>
+
+    <div class="wave"></div>
+
+    <div id="talkBtn">
+      <span id="talkMain">HABLAR</span>
+      <span id="talkSub">Esperando transmisión</span>
+    </div>
+
+    <div class="panel statusPanel">
+      <div id="status">🟢 CONECTADO</div>
+    </div>
+
+    <div class="panel userRow" id="openUsersPanel">
+      <div class="infoItem">
+        <div class="iconBox">👥</div>
+        <div>
+          <h3>Usuarios conectados</h3>
+          <div id="usersCountText">0 conectados</div>
+          <div id="usersBox"></div>
+        </div>
+      </div>
+
+      <div class="arrow">›</div>
+    </div>
+
+  </section>
+
+</main>
+
+<section id="usersScreen" class="hidden">
+  <div class="usersHeader">
+    <h2>👥 Usuarios</h2>
+    <button id="closeUsersScreen">VOLVER</button>
+  </div>
+
+  <div id="usersListScreen"></div>
+</section>
+
+<audio id="startSound" src="./motorola-start.mp3" preload="auto"></audio>
+<audio id="endSound" src="./motorola-end.mp3" preload="auto"></audio>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  set,
+  remove,
+  onValue,
+  onChildAdded,
+  onChildRemoved,
+  push,
+  onDisconnect,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDOZBVsRy8vzDl8YSrYkoOdT2kQvCP1DLw",
+  authDomain: "walkie-pro-1945a.firebaseapp.com",
+  databaseURL: "https://walkie-pro-1945a-default-rtdb.firebaseio.com/",
+  projectId: "walkie-pro-1945a",
+  storageBucket: "walkie-pro-1945a.firebasestorage.app",
+  messagingSenderId: "394474795757",
+  appId: "1:394474795757:web:275208911e6cb14757d2e4"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const iceServers = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  { urls: "stun:stun2.l.google.com:19302" }
+];
+
+let room = "";
+let myName = "";
+let myPeerId = "";
+let myDeviceId = "";
+let localStream = null;
+
+let users = {};
+let pcs = {};
+let pendingCandidates = {};
+let isTalking = false;
+let lastSpeakerId = null;
+let currentSpeakerId = null;
+let joinedReady = false;
+
+const loginBox = document.getElementById("loginBox");
+const radioBox = document.getElementById("radioBox");
+const joinBtn = document.getElementById("joinBtn");
+const talkBtn = document.getElementById("talkBtn");
+const talkMain = document.getElementById("talkMain");
+const talkSub = document.getElementById("talkSub");
+
+const usersBox = document.getElementById("usersBox");
+const usersCountText = document.getElementById("usersCountText");
+const usersScreen = document.getElementById("usersScreen");
+const usersListScreen = document.getElementById("usersListScreen");
+
+const startSound = document.getElementById("startSound");
+const endSound = document.getElementById("endSound");
+
+function playStart(){
+  try{
+    startSound.pause();
+    startSound.currentTime = 0;
+    startSound.volume = 1;
+    startSound.play().catch(()=>{});
+  }catch{}
+}
+
+function playEnd(){
+  try{
+    endSound.pause();
+    endSound.currentTime = 0;
+    endSound.volume = 1;
+    endSound.play().catch(()=>{});
+  }catch{}
+}
+
+function playJoin(){
+  try{
+    startSound.pause();
+    startSound.currentTime = 0;
+    startSound.volume = .65;
+    startSound.play().catch(()=>{});
+    setTimeout(()=>{ startSound.volume = 1; },500);
+  }catch{}
+}
+
+function getDeviceId(){
+  let id = localStorage.getItem("walkie_device");
+
+  if(!id){
+    id = "device-" + crypto.randomUUID();
+    localStorage.setItem("walkie_device", id);
+  }
+
+  return id;
+}
+
+function getPeerId(){
+  let id = localStorage.getItem("walkie_radio");
+
+  if(!id){
+    id = "radio-" + crypto.randomUUID().replace(/-/g,"").substring(0,14);
+    localStorage.setItem("walkie_radio", id);
+  }
+
+  return id;
+}
+
+function showSpeaker(name){
+  const box = document.getElementById("floatingSpeaker");
+  box.innerText = "🎙️ " + name + " está hablando";
+  box.style.display = "block";
+}
+
+function hideSpeaker(){
+  document.getElementById("floatingSpeaker").style.display = "none";
+}
+
+function showJoinToast(text){
+  const toast = document.getElementById("joinToast");
+  toast.innerText = text;
+  toast.style.display = "block";
+  playJoin();
+
+  setTimeout(()=>{
+    toast.style.display = "none";
+  },2600);
+}
+
+function signalForUser(id){
+  let hash = 0;
+
+  for(let i=0;i<id.length;i++){
+    hash += id.charCodeAt(i);
+  }
+
+  const level = hash % 3;
+
+  if(level === 0){
+    return { text:"Excelente", icon:"📶🛜", cls:"signalGood" };
+  }
+
+  if(level === 1){
+    return { text:"Buena", icon:"📶", cls:"signalMid" };
+  }
+
+  return { text:"Regular", icon:"📶", cls:"signalMid" };
+}
+
+function createAudio(peerId, stream){
+  let audio = document.getElementById("audio-" + peerId);
+
+  if(!audio){
+    audio = document.createElement("audio");
+    audio.id = "audio-" + peerId;
+    audio.autoplay = true;
+    audio.playsInline = true;
+    audio.controls = false;
+    document.body.appendChild(audio);
+  }
+
+  audio.srcObject = stream;
+  audio.volume = 1;
+  audio.muted = false;
+  audio.play().catch(()=>{});
+}
+
+function renderUsers(){
+  usersBox.innerHTML = "";
+
+  const ids = Object.keys(users).filter(id=>id !== myPeerId);
+  usersCountText.innerText = ids.length + " conectados";
+
+  if(ids.length === 0){
+    usersBox.innerHTML = "<div class='userMini'>Esperando usuarios...</div>";
+    renderUsersScreen();
+    return;
+  }
+
+  ids.forEach(id=>{
+    const isSpeaking = currentSpeakerId === id;
+    const div = document.createElement("div");
+
+    div.className = "userMini" + (isSpeaking ? " speakingUser" : "");
+    div.innerHTML =
+      "<b>" +
+      (isSpeaking ? "🎙️ " : "🟢 ") +
+      (users[id].name || "Usuario") +
+      (isSpeaking ? " está hablando" : "") +
+      "</b>";
+
+    usersBox.appendChild(div);
+  });
+
+  renderUsersScreen();
+}
+
+function renderUsersScreen(){
+  usersListScreen.innerHTML = "";
+
+  const ids = Object.keys(users).filter(id=>id !== myPeerId);
+
+  if(ids.length === 0){
+    usersListScreen.innerHTML =
+      "<div class='emptyUsers'>No hay usuarios conectados</div>";
+    return;
+  }
+
+  ids.forEach(id=>{
+    const user = users[id];
+    const signal = signalForUser(id);
+    const isSpeaking = currentSpeakerId === id;
+
+    const card = document.createElement("div");
+    card.className = "userCard";
+
+    card.innerHTML = `
+      <div class="userTop">
+        <div class="iconBox">${isSpeaking ? "🎙️" : "👤"}</div>
+        <div>
+          <div class="label">Usuario</div>
+          <div class="userNameBig">${user.name || "Usuario"}</div>
+          ${isSpeaking ? "<div class='online'>TRANSMITIENDO AHORA</div>" : ""}
+        </div>
+      </div>
+
+      <div class="userLineTitle">📱 ID dispositivo</div>
+      <div class="userBoxValue">${user.deviceId || "No disponible"}</div>
+
+      <div class="userLineTitle yellow">📡 ID Radio</div>
+      <div class="userBoxValue">${id}</div>
+
+      <div class="userBottom">
+        <div class="${signal.cls}">${signal.icon} ${signal.text}</div>
+        <div class="online">🟢 EN LÍNEA</div>
+      </div>
+    `;
+
+    usersListScreen.appendChild(card);
+  });
+}
+
+function getQueue(remoteId){
+  if(!pendingCandidates[remoteId]){
+    pendingCandidates[remoteId] = [];
+  }
+
+  return pendingCandidates[remoteId];
+}
+
+async function addCandidate(remoteId, pc, candidateData){
+  if(!candidateData) return;
+
+  if(!pc.remoteDescription || !pc.remoteDescription.type){
+    getQueue(remoteId).push(candidateData);
+    return;
+  }
+
+  try{
+    await pc.addIceCandidate(new RTCIceCandidate(candidateData));
+  }catch{}
+}
+
+async function applyPending(remoteId, pc){
+  const queue = getQueue(remoteId);
+
+  while(queue.length > 0){
+    const candidateData = queue.shift();
+
+    try{
+      await pc.addIceCandidate(new RTCIceCandidate(candidateData));
+    }catch{}
+  }
+}
+
+function makePC(remoteId){
+  if(pcs[remoteId]) return pcs[remoteId];
+
+  const pc = new RTCPeerConnection({ iceServers });
+
+  localStream.getTracks().forEach(track=>{
+    pc.addTrack(track, localStream);
+  });
+
+  pc.ontrack = event=>{
+    const remoteStream = event.streams && event.streams[0];
+
+    if(remoteStream){
+      createAudio(remoteId, remoteStream);
+    }
+  };
+
+  pc.onicecandidate = event=>{
+    if(!event.candidate) return;
+
+    push(
+      ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/candidates`),
+      event.candidate.toJSON()
+    );
+  };
+
+  pc.onconnectionstatechange = ()=>{
+    console.log("WebRTC", remoteId, pc.connectionState);
+  };
+
+  pcs[remoteId] = pc;
+  listenSignals(remoteId, pc);
+
+  return pc;
+}
+
+function listenSignals(remoteId, pc){
+  onValue(
+    ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/offer`),
+    async snap=>{
+      const offer = snap.val();
+
+      if(!offer || pc.connectionState === "closed") return;
+
+      try{
+        const sameOffer =
+          pc.currentRemoteDescription &&
+          pc.currentRemoteDescription.sdp === offer.sdp;
+
+        if(sameOffer) return;
+        if(pc.signalingState !== "stable") return;
+
+        await pc.setRemoteDescription(new RTCSessionDescription(offer));
+        await applyPending(remoteId, pc);
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        await set(
+          ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/answer`),
+          {
+            type: answer.type,
+            sdp: answer.sdp,
+            time: Date.now()
+          }
+        );
+      }catch(error){
+        console.warn("offer error", error);
+      }
+    }
+  );
+
+  onValue(
+    ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/answer`),
+    async snap=>{
+      const answer = snap.val();
+
+      if(!answer || pc.connectionState === "closed") return;
+
+      try{
+        if(pc.signalingState === "have-local-offer"){
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+          await applyPending(remoteId, pc);
+        }
+      }catch(error){
+        console.warn("answer error", error);
+      }
+    }
+  );
+
+  onChildAdded(
+    ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}/candidates`),
+    async snap=>{
+      await addCandidate(remoteId, pc, snap.val());
+    }
+  );
+}
+
+async function callPeer(remoteId){
+  const pc = makePC(remoteId);
+
+  if(pc.connectionState === "closed") return;
+  if(pc.signalingState !== "stable") return;
+
+  try{
+    await remove(
+      ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}`)
+    );
+
+    await remove(
+      ref(db, `rooms/${room}/signals/${myPeerId}/${remoteId}`)
+    );
+
+    pendingCandidates[remoteId] = [];
+
+    const offer = await pc.createOffer({
+      offerToReceiveAudio:true,
+      offerToReceiveVideo:false
+    });
+
+    await pc.setLocalDescription(offer);
+
+    await set(
+      ref(db, `rooms/${room}/signals/${remoteId}/${myPeerId}/offer`),
+      {
+        type: offer.type,
+        sdp: offer.sdp,
+        time: Date.now()
+      }
+    );
+  }catch(error){
+    console.warn("callPeer error", error);
+  }
+}
+
+function cleanupPeer(remoteId){
+  if(pcs[remoteId]){
+    try{
+      pcs[remoteId].close();
+    }catch{}
+
+    delete pcs[remoteId];
+  }
+
+  delete pendingCandidates[remoteId];
+
+  const audio = document.getElementById("audio-" + remoteId);
+
+  if(audio){
+    audio.remove();
+  }
+}
+
+async function joinRoom(){
+  myName = document.getElementById("nameInput").value.trim();
+  room = document.getElementById("roomInput").value.trim();
+
+  if(!myName || !room){
+    alert("Completa los datos");
+    return;
+  }
+
+  localStorage.setItem("walkie_name", myName);
+  localStorage.setItem("walkie_room", room);
+
+  myDeviceId = getDeviceId();
+  myPeerId = getPeerId();
+
+  try{
+    startSound.load();
+    endSound.load();
+  }catch{}
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio:true,
+      video:false
+    });
+  }catch{
+    alert("Permite el micrófono para usar el radio.");
+    return;
+  }
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  loginBox.classList.add("hidden");
+  radioBox.classList.remove("hidden");
+
+  document.getElementById("roomLabel").innerText = room;
+  document.getElementById("nameLabel").innerText = myName;
+  document.getElementById("deviceIdLabel").innerText = myDeviceId;
+  document.getElementById("myIdLabel").innerText = myPeerId;
+
+  await remove(ref(db, `rooms/${room}/signals/${myPeerId}`));
+
+  const myRef = ref(db, `rooms/${room}/peers/${myPeerId}`);
+
+  await set(myRef,{
+    id: myPeerId,
+    name: myName,
+    deviceId: myDeviceId,
+    joinedAt: serverTimestamp()
+  });
+
+  onDisconnect(myRef).remove();
+  onDisconnect(ref(db, `rooms/${room}/signals/${myPeerId}`)).remove();
+
+  setTimeout(()=>{
+    joinedReady = true;
+  },1500);
+
+  onChildAdded(
+    ref(db, `rooms/${room}/peers`),
+    async snap=>{
+      const user = snap.val();
+      const remoteId = snap.key;
+
+      const alreadyExists = users[remoteId];
+
+      users[remoteId] = user;
+      renderUsers();
+
+      if(
+        joinedReady &&
+        !alreadyExists &&
+        remoteId !== myPeerId
+      ){
+        showJoinToast(
+          "👤 " +
+          (user.name || "Usuario") +
+          " entró a la sala"
+        );
+      }
+
+      if(remoteId !== myPeerId){
+        makePC(remoteId);
+
+        if(myPeerId > remoteId){
+          setTimeout(()=>{
+            callPeer(remoteId);
+          },700);
+        }
+      }
+    }
+  );
+
+  onChildRemoved(
+    ref(db, `rooms/${room}/peers`),
+    snap=>{
+      const remoteId = snap.key;
+
+      delete users[remoteId];
+
+      cleanupPeer(remoteId);
+      renderUsers();
+    }
+  );
+
+  onValue(
+    ref(db, `rooms/${room}/speaking`),
+    snap=>{
+      const data = snap.val();
+
+      if(data && data.id !== myPeerId){
+        if(lastSpeakerId !== data.id){
+          playStart();
+        }
+
+        lastSpeakerId = data.id;
+        currentSpeakerId = data.id;
+
+        showSpeaker(data.name || "Usuario");
+        renderUsers();
+      }
+
+      if(!data){
+        if(lastSpeakerId && lastSpeakerId !== myPeerId){
+          playEnd();
+        }
+
+        lastSpeakerId = null;
+        currentSpeakerId = null;
+
+        hideSpeaker();
+        renderUsers();
+      }
+    }
+  );
+}
+
+function startTalking(){
+  if(isTalking || !localStream) return;
+
+  isTalking = true;
+  currentSpeakerId = myPeerId;
+
+  playStart();
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = true;
+  });
+
+  talkBtn.classList.add("transmitting");
+  talkMain.innerText = "TRANSMITIENDO";
+  talkSub.style.display = "none";
+
+  showSpeaker(myName);
+  renderUsers();
+
+  set(
+    ref(db, `rooms/${room}/speaking`),
+    {
+      id: myPeerId,
+      name: myName,
+      time: Date.now()
+    }
+  );
+}
+
+function stopTalking(){
+  if(!isTalking || !localStream) return;
+
+  isTalking = false;
+
+  playEnd();
+
+  localStream.getAudioTracks().forEach(track=>{
+    track.enabled = false;
+  });
+
+  talkBtn.classList.remove("transmitting");
+  talkMain.innerText = "HABLAR";
+  talkSub.style.display = "block";
+
+  currentSpeakerId = null;
+
+  hideSpeaker();
+  renderUsers();
+
+  remove(ref(db, `rooms/${room}/speaking`));
+}
+
+talkBtn.addEventListener("pointerdown",e=>{
+  e.preventDefault();
+
+  try{
+    talkBtn.setPointerCapture(e.pointerId);
+  }catch{}
+
+  startTalking();
+});
+
+talkBtn.addEventListener("pointerup",e=>{
+  e.preventDefault();
+
+  try{
+    talkBtn.releasePointerCapture(e.pointerId);
+  }catch{}
+
+  stopTalking();
+});
+
+talkBtn.addEventListener("pointercancel",e=>{
+  e.preventDefault();
+  stopTalking();
+});
+
+talkBtn.addEventListener("lostpointercapture",()=>{
+  stopTalking();
+});
+
+joinBtn.addEventListener("click",joinRoom);
+
+document.getElementById("openUsersPanel").addEventListener("click",()=>{
+  usersScreen.classList.remove("hidden");
+  renderUsersScreen();
+});
+
+document.getElementById("closeUsersScreen").addEventListener("click",()=>{
+  usersScreen.classList.add("hidden");
+});
+
+window.addEventListener("load",()=>{
+  const savedName = localStorage.getItem("walkie_name");
+  const savedRoom = localStorage.getItem("walkie_room");
+
+  const params = new URLSearchParams(location.search);
+  const roomFromUrl = params.get("sala");
+
+  if(savedName){
+    document.getElementById("nameInput").value = savedName;
+  }
+
+  if(roomFromUrl){
+    document.getElementById("roomInput").value = roomFromUrl;
+  }else if(savedRoom){
+    document.getElementById("roomInput").value = savedRoom;
+  }
+});
+
+window.addEventListener("beforeunload",()=>{
+  if(room && myPeerId){
+    remove(ref(db, `rooms/${room}/peers/${myPeerId}`));
+    remove(ref(db, `rooms/${room}/signals/${myPeerId}`));
+  }
+});
+</script>
+
 </body>
 </html>
